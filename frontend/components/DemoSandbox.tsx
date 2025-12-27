@@ -119,6 +119,9 @@ export default function DemoSandbox() {
     recognition.interimResults = true;
     recognition.lang = 'en-US';
 
+    let interimTimeout: NodeJS.Timeout | null = null;
+    let lastInterimTranscript = '';
+
     recognition.onstart = () => {
       setIsListening(true);
       console.log('Speech recognition started');
@@ -138,27 +141,64 @@ export default function DemoSandbox() {
       }
 
       if (finalTranscript) {
+        console.log('Final transcript:', finalTranscript);
         setUserTranscript(finalTranscript);
+
+        // Clear any pending interim timeout
+        if (interimTimeout) {
+          clearTimeout(interimTimeout);
+          interimTimeout = null;
+        }
+
         // Send to backend
         const ws = (window as any).voiceWebSocket;
         if (ws && ws.readyState === WebSocket.OPEN) {
+          console.log('Sending to backend:', finalTranscript);
           ws.send(JSON.stringify({
             type: 'user_speech',
             text: finalTranscript,
           }));
         }
-      } else {
+      } else if (interimTranscript) {
+        console.log('Interim transcript:', interimTranscript);
         setUserTranscript(interimTranscript);
+        lastInterimTranscript = interimTranscript;
+
+        // Clear existing timeout
+        if (interimTimeout) {
+          clearTimeout(interimTimeout);
+        }
+
+        // Set timeout to send interim transcript if no final comes through
+        interimTimeout = setTimeout(() => {
+          if (lastInterimTranscript) {
+            console.log('Timeout - sending interim transcript:', lastInterimTranscript);
+            const ws = (window as any).voiceWebSocket;
+            if (ws && ws.readyState === WebSocket.OPEN) {
+              ws.send(JSON.stringify({
+                type: 'user_speech',
+                text: lastInterimTranscript,
+              }));
+              lastInterimTranscript = '';
+            }
+          }
+        }, 1500); // Send after 1.5 seconds of no final transcript
       }
     };
 
     recognition.onerror = (event: any) => {
       console.error('Speech recognition error:', event.error);
       setIsListening(false);
+      if (interimTimeout) {
+        clearTimeout(interimTimeout);
+      }
     };
 
     recognition.onend = () => {
       setIsListening(false);
+      if (interimTimeout) {
+        clearTimeout(interimTimeout);
+      }
       // Auto-restart if call is still active
       if ((window as any).voiceWebSocket?.readyState === WebSocket.OPEN) {
         recognition.start();
