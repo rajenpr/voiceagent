@@ -1,0 +1,33 @@
+# Python
+__pycache__/
+*.py[cod]
+*$py.class
+*.so
+.Python
+venv/
+env/
+ENV/
+*.egg-info/
+dist/
+build/
+
+# Environment
+.env
+
+# Data
+data/uploads/*
+data/chroma/*
+!data/uploads/.gitkeep
+!data/chroma/.gitkeep
+
+# IDE
+.vscode/
+.idea/
+*.swp
+
+# Logs
+*.log
+
+# Testing
+.coverage
+.pytest_cache/

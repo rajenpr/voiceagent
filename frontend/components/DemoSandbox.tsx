@@ -1,0 +1,427 @@
+'use client';
+
+import { useState, useCallback } from 'react';
+import { motion, AnimatePresence } from 'framer-motion';
+
+interface FormData {
+  businessName: string;
+  industry: string;
+  primaryGoal: string;
+}
+
+export default function DemoSandbox() {
+  const [formData, setFormData] = useState<FormData>({
+    businessName: '',
+    industry: '',
+    primaryGoal: '',
+  });
+  const [uploadedFiles, setUploadedFiles] = useState<File[]>([]);
+  const [isCallActive, setIsCallActive] = useState(false);
+  const [step, setStep] = useState(1);
+  const [dragActive, setDragActive] = useState(false);
+
+  const industries = [
+    'Plumber',
+    'Medical Clinic',
+    'Electrician',
+    'HVAC',
+    'Legal Firm',
+    'Real Estate',
+    'Dental Office',
+    'Auto Repair',
+    'Other',
+  ];
+
+  const goals = [
+    'Book Appointments',
+    'Lead Qualification',
+    'Customer Support',
+    'Emergency Dispatch',
+    'Information Queries',
+  ];
+
+  const handleInputChange = (e: React.ChangeEvent<HTMLInputElement | HTMLSelectElement>) => {
+    setFormData({ ...formData, [e.target.name]: e.target.value });
+  };
+
+  const handleDrag = useCallback((e: React.DragEvent) => {
+    e.preventDefault();
+    e.stopPropagation();
+    if (e.type === 'dragenter' || e.type === 'dragover') {
+      setDragActive(true);
+    } else if (e.type === 'dragleave') {
+      setDragActive(false);
+    }
+  }, []);
+
+  const handleDrop = useCallback((e: React.DragEvent) => {
+    e.preventDefault();
+    e.stopPropagation();
+    setDragActive(false);
+
+    if (e.dataTransfer.files && e.dataTransfer.files[0]) {
+      const newFiles = Array.from(e.dataTransfer.files);
+      setUploadedFiles((prev) => [...prev, ...newFiles]);
+    }
+  }, []);
+
+  const handleFileChange = (e: React.ChangeEvent<HTMLInputElement>) => {
+    if (e.target.files && e.target.files[0]) {
+      const newFiles = Array.from(e.target.files);
+      setUploadedFiles((prev) => [...prev, ...newFiles]);
+    }
+  };
+
+  const removeFile = (index: number) => {
+    setUploadedFiles((prev) => prev.filter((_, i) => i !== index));
+  };
+
+  const startCall = async () => {
+    setIsCallActive(true);
+    // This will connect to the backend WebRTC endpoint
+    console.log('Starting call with:', { formData, uploadedFiles });
+  };
+
+  const endCall = () => {
+    setIsCallActive(false);
+  };
+
+  return (
+    <section id="demo" className="relative py-20 px-6">
+      <div className="max-w-6xl mx-auto">
+        <motion.div
+          initial={{ opacity: 0, y: 20 }}
+          whileInView={{ opacity: 1, y: 0 }}
+          viewport={{ once: true }}
+          className="text-center mb-12"
+        >
+          <h2 className="text-5xl md:text-6xl font-bold text-white mb-6">
+            Try It{' '}
+            <span className="bg-gradient-to-r from-stripe-purple to-stripe-lightBlue bg-clip-text text-transparent">
+              Live
+            </span>
+          </h2>
+          <p className="text-xl text-gray-300 max-w-2xl mx-auto">
+            Experience the power of real-time voice AI. Upload your business information
+            and have a conversation in seconds.
+          </p>
+        </motion.div>
+
+        <motion.div
+          initial={{ opacity: 0, scale: 0.95 }}
+          whileInView={{ opacity: 1, scale: 1 }}
+          viewport={{ once: true }}
+          className="bg-gradient-to-br from-slate-800/50 to-slate-900/50 backdrop-blur-sm border border-white/10 rounded-2xl p-8 shadow-2xl"
+        >
+          {/* Progress Steps */}
+          <div className="flex justify-between mb-12">
+            {[1, 2, 3].map((s) => (
+              <div key={s} className="flex items-center flex-1">
+                <div className="flex flex-col items-center flex-1">
+                  <div
+                    className={`w-12 h-12 rounded-full flex items-center justify-center font-bold transition-all ${
+                      step >= s
+                        ? 'bg-gradient-to-r from-stripe-purple to-stripe-lightBlue text-white'
+                        : 'bg-slate-700 text-gray-400'
+                    }`}
+                  >
+                    {s}
+                  </div>
+                  <div className={`mt-2 text-sm ${step >= s ? 'text-white' : 'text-gray-400'}`}>
+                    {s === 1 && 'Business Info'}
+                    {s === 2 && 'Upload Docs'}
+                    {s === 3 && 'Test Call'}
+                  </div>
+                </div>
+                {s < 3 && (
+                  <div
+                    className={`h-1 flex-1 mx-4 rounded ${
+                      step > s ? 'bg-gradient-to-r from-stripe-purple to-stripe-lightBlue' : 'bg-slate-700'
+                    }`}
+                  />
+                )}
+              </div>
+            ))}
+          </div>
+
+          <AnimatePresence mode="wait">
+            {/* Step 1: Business Information */}
+            {step === 1 && (
+              <motion.div
+                key="step1"
+                initial={{ opacity: 0, x: 20 }}
+                animate={{ opacity: 1, x: 0 }}
+                exit={{ opacity: 0, x: -20 }}
+                className="space-y-6"
+              >
+                <div>
+                  <label className="block text-white font-semibold mb-2">Business Name</label>
+                  <input
+                    type="text"
+                    name="businessName"
+                    value={formData.businessName}
+                    onChange={handleInputChange}
+                    placeholder="e.g., Quick Fix Plumbing"
+                    className="w-full px-4 py-3 bg-slate-800/50 border border-white/10 rounded-lg text-white placeholder-gray-400 focus:border-stripe-purple focus:outline-none transition-colors"
+                  />
+                </div>
+
+                <div>
+                  <label className="block text-white font-semibold mb-2">Industry</label>
+                  <select
+                    name="industry"
+                    value={formData.industry}
+                    onChange={handleInputChange}
+                    className="w-full px-4 py-3 bg-slate-800/50 border border-white/10 rounded-lg text-white focus:border-stripe-purple focus:outline-none transition-colors"
+                  >
+                    <option value="">Select your industry</option>
+                    {industries.map((industry) => (
+                      <option key={industry} value={industry}>
+                        {industry}
+                      </option>
+                    ))}
+                  </select>
+                </div>
+
+                <div>
+                  <label className="block text-white font-semibold mb-2">Primary Goal</label>
+                  <select
+                    name="primaryGoal"
+                    value={formData.primaryGoal}
+                    onChange={handleInputChange}
+                    className="w-full px-4 py-3 bg-slate-800/50 border border-white/10 rounded-lg text-white focus:border-stripe-purple focus:outline-none transition-colors"
+                  >
+                    <option value="">What should the AI help with?</option>
+                    {goals.map((goal) => (
+                      <option key={goal} value={goal}>
+                        {goal}
+                      </option>
+                    ))}
+                  </select>
+                </div>
+
+                <button
+                  onClick={() => setStep(2)}
+                  disabled={!formData.businessName || !formData.industry || !formData.primaryGoal}
+                  className="w-full px-6 py-4 bg-gradient-to-r from-stripe-purple to-stripe-lightBlue text-white rounded-lg font-semibold shadow-lg hover:shadow-xl transition-all disabled:opacity-50 disabled:cursor-not-allowed transform hover:scale-[1.02]"
+                >
+                  Continue to Upload
+                </button>
+              </motion.div>
+            )}
+
+            {/* Step 2: File Upload */}
+            {step === 2 && (
+              <motion.div
+                key="step2"
+                initial={{ opacity: 0, x: 20 }}
+                animate={{ opacity: 1, x: 0 }}
+                exit={{ opacity: 0, x: -20 }}
+                className="space-y-6"
+              >
+                <div
+                  onDragEnter={handleDrag}
+                  onDragLeave={handleDrag}
+                  onDragOver={handleDrag}
+                  onDrop={handleDrop}
+                  className={`border-2 border-dashed rounded-xl p-12 text-center transition-all ${
+                    dragActive
+                      ? 'border-stripe-purple bg-stripe-purple/10'
+                      : 'border-white/20 hover:border-stripe-purple/50'
+                  }`}
+                >
+                  <svg
+                    className="w-16 h-16 mx-auto mb-4 text-gray-400"
+                    fill="none"
+                    viewBox="0 0 24 24"
+                    stroke="currentColor"
+                  >
+                    <path
+                      strokeLinecap="round"
+                      strokeLinejoin="round"
+                      strokeWidth={2}
+                      d="M7 16a4 4 0 01-.88-7.903A5 5 0 1115.9 6L16 6a5 5 0 011 9.9M15 13l-3-3m0 0l-3 3m3-3v12"
+                    />
+                  </svg>
+                  <p className="text-white font-semibold mb-2">
+                    Drop your files here or click to browse
+                  </p>
+                  <p className="text-gray-400 text-sm mb-4">
+                    PDF, TXT, or DOCX files (Service menus, pricing, FAQs)
+                  </p>
+                  <input
+                    type="file"
+                    onChange={handleFileChange}
+                    multiple
+                    accept=".pdf,.txt,.docx"
+                    className="hidden"
+                    id="file-upload"
+                  />
+                  <label
+                    htmlFor="file-upload"
+                    className="inline-block px-6 py-3 bg-slate-700 hover:bg-slate-600 text-white rounded-lg cursor-pointer transition-colors"
+                  >
+                    Choose Files
+                  </label>
+                </div>
+
+                {/* Uploaded Files List */}
+                {uploadedFiles.length > 0 && (
+                  <div className="space-y-2">
+                    <h4 className="text-white font-semibold">Uploaded Files:</h4>
+                    {uploadedFiles.map((file, index) => (
+                      <div
+                        key={index}
+                        className="flex items-center justify-between bg-slate-800/50 rounded-lg p-4"
+                      >
+                        <div className="flex items-center space-x-3">
+                          <svg
+                            className="w-6 h-6 text-stripe-purple"
+                            fill="none"
+                            viewBox="0 0 24 24"
+                            stroke="currentColor"
+                          >
+                            <path
+                              strokeLinecap="round"
+                              strokeLinejoin="round"
+                              strokeWidth={2}
+                              d="M9 12h6m-6 4h6m2 5H7a2 2 0 01-2-2V5a2 2 0 012-2h5.586a1 1 0 01.707.293l5.414 5.414a1 1 0 01.293.707V19a2 2 0 01-2 2z"
+                            />
+                          </svg>
+                          <span className="text-white">{file.name}</span>
+                          <span className="text-gray-400 text-sm">
+                            ({(file.size / 1024).toFixed(1)} KB)
+                          </span>
+                        </div>
+                        <button
+                          onClick={() => removeFile(index)}
+                          className="text-red-400 hover:text-red-300 transition-colors"
+                        >
+                          <svg className="w-5 h-5" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                            <path
+                              strokeLinecap="round"
+                              strokeLinejoin="round"
+                              strokeWidth={2}
+                              d="M6 18L18 6M6 6l12 12"
+                            />
+                          </svg>
+                        </button>
+                      </div>
+                    ))}
+                  </div>
+                )}
+
+                <div className="flex space-x-4">
+                  <button
+                    onClick={() => setStep(1)}
+                    className="flex-1 px-6 py-4 bg-slate-700 hover:bg-slate-600 text-white rounded-lg font-semibold transition-colors"
+                  >
+                    Back
+                  </button>
+                  <button
+                    onClick={() => setStep(3)}
+                    className="flex-1 px-6 py-4 bg-gradient-to-r from-stripe-purple to-stripe-lightBlue text-white rounded-lg font-semibold shadow-lg hover:shadow-xl transition-all transform hover:scale-[1.02]"
+                  >
+                    Continue to Test Call
+                  </button>
+                </div>
+              </motion.div>
+            )}
+
+            {/* Step 3: Test Call */}
+            {step === 3 && (
+              <motion.div
+                key="step3"
+                initial={{ opacity: 0, x: 20 }}
+                animate={{ opacity: 1, x: 0 }}
+                exit={{ opacity: 0, x: -20 }}
+                className="space-y-6"
+              >
+                <div className="bg-slate-800/30 rounded-xl p-6 mb-6">
+                  <h4 className="text-white font-semibold mb-4">Your Configuration:</h4>
+                  <div className="space-y-2 text-gray-300">
+                    <p>
+                      <span className="text-gray-400">Business:</span> {formData.businessName}
+                    </p>
+                    <p>
+                      <span className="text-gray-400">Industry:</span> {formData.industry}
+                    </p>
+                    <p>
+                      <span className="text-gray-400">Goal:</span> {formData.primaryGoal}
+                    </p>
+                    <p>
+                      <span className="text-gray-400">Files:</span> {uploadedFiles.length} uploaded
+                    </p>
+                  </div>
+                </div>
+
+                <div className="text-center">
+                  {!isCallActive ? (
+                    <>
+                      <motion.button
+                        whileHover={{ scale: 1.05 }}
+                        whileTap={{ scale: 0.95 }}
+                        onClick={startCall}
+                        className="w-full md:w-auto px-12 py-6 bg-gradient-to-r from-stripe-purple to-stripe-lightBlue text-white rounded-xl font-bold text-lg shadow-2xl hover:shadow-stripe-purple/50 transition-all mb-4"
+                      >
+                        <div className="flex items-center justify-center space-x-3">
+                          <svg className="w-6 h-6" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                            <path
+                              strokeLinecap="round"
+                              strokeLinejoin="round"
+                              strokeWidth={2}
+                              d="M3 5a2 2 0 012-2h3.28a1 1 0 01.948.684l1.498 4.493a1 1 0 01-.502 1.21l-2.257 1.13a11.042 11.042 0 005.516 5.516l1.13-2.257a1 1 0 011.21-.502l4.493 1.498a1 1 0 01.684.949V19a2 2 0 01-2 2h-1C9.716 21 3 14.284 3 6V5z"
+                            />
+                          </svg>
+                          <span>Start Test Call</span>
+                        </div>
+                      </motion.button>
+                      <p className="text-gray-400 text-sm">
+                        Click to initiate a WebRTC voice session in your browser
+                      </p>
+                    </>
+                  ) : (
+                    <div className="space-y-6">
+                      <div className="flex flex-col items-center">
+                        <motion.div
+                          animate={{ scale: [1, 1.1, 1] }}
+                          transition={{ repeat: Infinity, duration: 2 }}
+                          className="w-32 h-32 bg-gradient-to-r from-stripe-purple to-stripe-lightBlue rounded-full flex items-center justify-center mb-6"
+                        >
+                          <svg className="w-16 h-16 text-white" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                            <path
+                              strokeLinecap="round"
+                              strokeLinejoin="round"
+                              strokeWidth={2}
+                              d="M19 11a7 7 0 01-7 7m0 0a7 7 0 01-7-7m7 7v4m0 0H8m4 0h4m-4-8a3 3 0 01-3-3V5a3 3 0 116 0v6a3 3 0 01-3 3z"
+                            />
+                          </svg>
+                        </motion.div>
+                        <p className="text-white font-semibold text-xl mb-2">Call in Progress</p>
+                        <p className="text-gray-400">Speak naturally - the AI is listening</p>
+                      </div>
+
+                      <button
+                        onClick={endCall}
+                        className="px-8 py-4 bg-red-500 hover:bg-red-600 text-white rounded-lg font-semibold transition-colors"
+                      >
+                        End Call
+                      </button>
+                    </div>
+                  )}
+                </div>
+
+                <button
+                  onClick={() => setStep(2)}
+                  className="w-full px-6 py-3 bg-slate-700 hover:bg-slate-600 text-white rounded-lg font-semibold transition-colors"
+                >
+                  Back to Upload
+                </button>
+              </motion.div>
+            )}
+          </AnimatePresence>
+        </motion.div>
+      </div>
+    </section>
+  );
+}
