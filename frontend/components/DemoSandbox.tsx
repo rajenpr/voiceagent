@@ -423,7 +423,7 @@ export default function DemoSandbox() {
                     className="w-full px-4 py-3 bg-slate-800/50 border border-white/10 rounded-lg text-white placeholder-gray-400 focus:border-stripe-purple focus:outline-none transition-colors resize-none font-mono text-sm"
                   />
                   <p className="text-gray-400 text-xs mt-2">
-                    💡 Tip: Be specific about the steps the AI should follow (e.g., "First ask for name, then phone number, then preferred appointment time...")
+                    💡 Tip: Be specific about the steps the AI should follow (e.g., &ldquo;First ask for name, then phone number, then preferred appointment time...&rdquo;)
                   </p>
                 </div>
 
