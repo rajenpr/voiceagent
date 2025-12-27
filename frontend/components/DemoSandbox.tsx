@@ -20,6 +20,8 @@ export default function DemoSandbox() {
   const [step, setStep] = useState(1);
   const [dragActive, setDragActive] = useState(false);
   const [agentMessage, setAgentMessage] = useState<string>('');
+  const [isListening, setIsListening] = useState(false);
+  const [userTranscript, setUserTranscript] = useState<string>('');
 
   const industries = [
     'Plumber',
@@ -77,6 +79,94 @@ export default function DemoSandbox() {
     setUploadedFiles((prev) => prev.filter((_, i) => i !== index));
   };
 
+  const playAudio = (base64Audio: string) => {
+    try {
+      // Convert base64 to blob
+      const audioData = atob(base64Audio);
+      const arrayBuffer = new ArrayBuffer(audioData.length);
+      const view = new Uint8Array(arrayBuffer);
+      for (let i = 0; i < audioData.length; i++) {
+        view[i] = audioData.charCodeAt(i);
+      }
+      const blob = new Blob([arrayBuffer], { type: 'audio/mpeg' });
+      const url = URL.createObjectURL(blob);
+
+      // Play audio
+      const audio = new Audio(url);
+      audio.play().catch((e) => console.error('Error playing audio:', e));
+
+      // Cleanup
+      audio.onended = () => {
+        URL.revokeObjectURL(url);
+      };
+    } catch (error) {
+      console.error('Error playing audio:', error);
+    }
+  };
+
+  const startSpeechRecognition = () => {
+    if (!('webkitSpeechRecognition' in window) && !('SpeechRecognition' in window)) {
+      alert('Speech recognition not supported in this browser. Please use Chrome or Edge.');
+      return;
+    }
+
+    const SpeechRecognition = (window as any).SpeechRecognition || (window as any).webkitSpeechRecognition;
+    const recognition = new SpeechRecognition();
+
+    recognition.continuous = true;
+    recognition.interimResults = true;
+    recognition.lang = 'en-US';
+
+    recognition.onstart = () => {
+      setIsListening(true);
+      console.log('Speech recognition started');
+    };
+
+    recognition.onresult = (event: any) => {
+      let interimTranscript = '';
+      let finalTranscript = '';
+
+      for (let i = event.resultIndex; i < event.results.length; i++) {
+        const transcript = event.results[i][0].transcript;
+        if (event.results[i].isFinal) {
+          finalTranscript += transcript;
+        } else {
+          interimTranscript += transcript;
+        }
+      }
+
+      if (finalTranscript) {
+        setUserTranscript(finalTranscript);
+        // Send to backend
+        const ws = (window as any).voiceWebSocket;
+        if (ws && ws.readyState === WebSocket.OPEN) {
+          ws.send(JSON.stringify({
+            type: 'user_speech',
+            text: finalTranscript,
+          }));
+        }
+      } else {
+        setUserTranscript(interimTranscript);
+      }
+    };
+
+    recognition.onerror = (event: any) => {
+      console.error('Speech recognition error:', event.error);
+      setIsListening(false);
+    };
+
+    recognition.onend = () => {
+      setIsListening(false);
+      // Auto-restart if call is still active
+      if ((window as any).voiceWebSocket?.readyState === WebSocket.OPEN) {
+        recognition.start();
+      }
+    };
+
+    (window as any).speechRecognition = recognition;
+    recognition.start();
+  };
+
   const startCall = async () => {
     try {
       setIsCallActive(true);
@@ -127,6 +217,8 @@ export default function DemoSandbox() {
       ws.onopen = () => {
         console.log('WebSocket connected');
         setAgentMessage('Connecting to AI agent...');
+        // Start speech recognition
+        startSpeechRecognition();
       };
 
       ws.onmessage = (event) => {
@@ -136,11 +228,19 @@ export default function DemoSandbox() {
 
           if (data.type === 'agent_response') {
             setAgentMessage(data.text || 'AI is thinking...');
+            // Play audio if available
+            if (data.audio) {
+              playAudio(data.audio);
+            }
           } else if (data.error) {
             console.error('Server error:', data.error);
             setAgentMessage(`Error: ${data.error}`);
           } else if (data.type === 'call_ended') {
             setAgentMessage(data.message || 'Call ended');
+            // Play goodbye audio
+            if (data.audio) {
+              playAudio(data.audio);
+            }
             setTimeout(() => setIsCallActive(false), 2000);
           }
         } catch (e) {
@@ -170,6 +270,13 @@ export default function DemoSandbox() {
   };
 
   const endCall = () => {
+    // Stop speech recognition
+    const recognition = (window as any).speechRecognition;
+    if (recognition) {
+      recognition.stop();
+      (window as any).speechRecognition = null;
+    }
+
     // Send end call message to backend
     const ws = (window as any).voiceWebSocket;
     if (ws && ws.readyState === WebSocket.OPEN) {
@@ -182,6 +289,8 @@ export default function DemoSandbox() {
     (window as any).voiceWebSocket = null;
     setIsCallActive(false);
     setAgentMessage('');
+    setIsListening(false);
+    setUserTranscript('');
   };
 
   return (
@@ -496,7 +605,26 @@ export default function DemoSandbox() {
                           </svg>
                         </motion.div>
                         <p className="text-white font-semibold text-xl mb-2">Call in Progress</p>
-                        <p className="text-gray-400">The AI agent is speaking</p>
+                        <div className="flex items-center justify-center space-x-2 mb-4">
+                          <div className={`w-3 h-3 rounded-full ${isListening ? 'bg-green-500 animate-pulse' : 'bg-gray-500'}`} />
+                          <p className="text-gray-400">{isListening ? 'Listening...' : 'Waiting for speech'}</p>
+                        </div>
+
+                        {/* User Transcript */}
+                        {userTranscript && (
+                          <motion.div
+                            initial={{ opacity: 0, y: 10 }}
+                            animate={{ opacity: 1, y: 0 }}
+                            className="mt-4 p-4 bg-blue-900/30 border border-blue-500/30 rounded-xl max-w-md"
+                          >
+                            <div className="flex items-start space-x-3">
+                              <svg className="w-5 h-5 text-blue-400 flex-shrink-0 mt-1" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                                <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M16 7a4 4 0 11-8 0 4 4 0 018 0zM12 14a7 7 0 00-7 7h14a7 7 0 00-7-7z" />
+                              </svg>
+                              <p className="text-blue-100 text-sm leading-relaxed">You: {userTranscript}</p>
+                            </div>
+                          </motion.div>
+                        )}
 
                         {/* Agent Message Display */}
                         {agentMessage && (

@@ -5,6 +5,8 @@ Implements ultra-low latency voice interactions with WebRTC, Groq LLM, and Eleve
 
 import os
 import asyncio
+import base64
+import httpx
 from typing import Dict, Any
 from fastapi import WebSocket
 
@@ -100,6 +102,48 @@ Important:
             print(f"Error processing speech: {e}")
             return "I apologize, but I'm having trouble processing that. Could you please repeat?"
 
+    async def generate_speech(self, text: str) -> str:
+        """
+        Generate speech audio from text using ElevenLabs API
+        Returns base64 encoded audio
+        """
+        try:
+            if not self.elevenlabs_api_key or self.elevenlabs_api_key == "your_elevenlabs_api_key_here":
+                print("ElevenLabs API key not configured")
+                return None
+
+            url = f"https://api.elevenlabs.io/v1/text-to-speech/{self.voice_id}"
+
+            headers = {
+                "Accept": "audio/mpeg",
+                "Content-Type": "application/json",
+                "xi-api-key": self.elevenlabs_api_key
+            }
+
+            data = {
+                "text": text,
+                "model_id": "eleven_turbo_v2",
+                "voice_settings": {
+                    "stability": 0.5,
+                    "similarity_boost": 0.75
+                }
+            }
+
+            async with httpx.AsyncClient() as client:
+                response = await client.post(url, json=data, headers=headers, timeout=30.0)
+
+                if response.status_code == 200:
+                    # Convert audio bytes to base64
+                    audio_base64 = base64.b64encode(response.content).decode('utf-8')
+                    return audio_base64
+                else:
+                    print(f"ElevenLabs API error: {response.status_code} - {response.text}")
+                    return None
+
+        except Exception as e:
+            print(f"Error generating speech: {e}")
+            return None
+
     async def run(self, websocket: WebSocket):
         """
         Main pipeline execution
@@ -108,10 +152,14 @@ Important:
         try:
             # Send initial greeting
             greeting = f"Hello! Thank you for contacting {self.business_config['business_name']}. How can I assist you today?"
+
+            # Generate audio for greeting
+            greeting_audio = await self.generate_speech(greeting)
+
             await websocket.send_json({
                 "type": "agent_response",
                 "text": greeting,
-                "audio": None,  # In production, this would be TTS audio
+                "audio": greeting_audio,  # Base64 encoded MP3
             })
 
             # Main conversation loop
@@ -125,17 +173,24 @@ Important:
                     # Process with LLM
                     response = await self.handle_user_speech(transcript)
 
+                    # Generate audio for response
+                    response_audio = await self.generate_speech(response)
+
                     # Send response back
                     await websocket.send_json({
                         "type": "agent_response",
                         "text": response,
-                        "audio": None,  # In production, this would be TTS audio
+                        "audio": response_audio,  # Base64 encoded MP3
                     })
 
                 elif data.get("type") == "end_call":
+                    goodbye_message = "Thank you for calling. Goodbye!"
+                    goodbye_audio = await self.generate_speech(goodbye_message)
+
                     await websocket.send_json({
                         "type": "call_ended",
-                        "message": "Thank you for calling. Goodbye!",
+                        "message": goodbye_message,
+                        "audio": goodbye_audio,
                     })
                     break
 
