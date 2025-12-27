@@ -23,6 +23,7 @@ export default function DemoSandbox() {
   const [dragActive, setDragActive] = useState(false);
   const [agentMessage, setAgentMessage] = useState<string>('');
   const [isListening, setIsListening] = useState(false);
+  const [isProcessing, setIsProcessing] = useState(false);
   const [userTranscript, setUserTranscript] = useState<string>('');
 
   const industries = [
@@ -83,6 +84,13 @@ export default function DemoSandbox() {
 
   const playAudio = (base64Audio: string) => {
     try {
+      // Stop any currently playing audio to prevent doubling
+      const currentAudio = (window as any).currentAudioElement;
+      if (currentAudio && !currentAudio.paused) {
+        currentAudio.pause();
+        currentAudio.currentTime = 0;
+      }
+
       // Convert base64 to blob
       const audioData = atob(base64Audio);
       const arrayBuffer = new ArrayBuffer(audioData.length);
@@ -95,11 +103,16 @@ export default function DemoSandbox() {
 
       // Play audio
       const audio = new Audio(url);
+      (window as any).currentAudioElement = audio;
+
       audio.play().catch((e) => console.error('Error playing audio:', e));
 
       // Cleanup
       audio.onended = () => {
         URL.revokeObjectURL(url);
+        if ((window as any).currentAudioElement === audio) {
+          (window as any).currentAudioElement = null;
+        }
       };
     } catch (error) {
       console.error('Error playing audio:', error);
@@ -118,6 +131,7 @@ export default function DemoSandbox() {
     recognition.continuous = true;
     recognition.interimResults = true;
     recognition.lang = 'en-US';
+    recognition.maxAlternatives = 1; // Get best result for accuracy
 
     let interimTimeout: NodeJS.Timeout | null = null;
     let lastInterimTranscript = '';
@@ -157,6 +171,7 @@ export default function DemoSandbox() {
           const ws = (window as any).voiceWebSocket;
           if (ws && ws.readyState === WebSocket.OPEN) {
             console.log('Sending final to backend:', finalTranscript);
+            setIsProcessing(true); // Show processing state
             ws.send(JSON.stringify({
               type: 'user_speech',
               text: finalTranscript,
@@ -186,6 +201,7 @@ export default function DemoSandbox() {
             console.log('Timeout - sending interim transcript:', lastInterimTranscript);
             const ws = (window as any).voiceWebSocket;
             if (ws && ws.readyState === WebSocket.OPEN) {
+              setIsProcessing(true); // Show processing state
               ws.send(JSON.stringify({
                 type: 'user_speech',
                 text: lastInterimTranscript,
@@ -194,7 +210,7 @@ export default function DemoSandbox() {
             }
           }
           lastInterimTranscript = '';
-        }, 2000); // Increased to 2 seconds
+        }, 1000); // Reduced to 1 second for faster response
       }
     };
 
@@ -297,15 +313,19 @@ export default function DemoSandbox() {
           const data = JSON.parse(event.data);
 
           if (data.type === 'agent_response') {
+            setIsProcessing(false); // Clear processing state
             setAgentMessage(data.text || 'AI is thinking...');
+            setUserTranscript(''); // Clear user transcript after response
             // Play audio if available
             if (data.audio) {
               playAudio(data.audio);
             }
           } else if (data.error) {
             console.error('Server error:', data.error);
+            setIsProcessing(false); // Clear processing state on error
             setAgentMessage(`Error: ${data.error}`);
           } else if (data.type === 'call_ended') {
+            setIsProcessing(false); // Clear processing state
             setAgentMessage(data.message || 'Call ended');
             // Play goodbye audio
             if (data.audio) {
@@ -347,6 +367,14 @@ export default function DemoSandbox() {
       (window as any).speechRecognition = null;
     }
 
+    // Stop any playing audio
+    const currentAudio = (window as any).currentAudioElement;
+    if (currentAudio && !currentAudio.paused) {
+      currentAudio.pause();
+      currentAudio.currentTime = 0;
+    }
+    (window as any).currentAudioElement = null;
+
     // Send end call message to backend
     const ws = (window as any).voiceWebSocket;
     if (ws && ws.readyState === WebSocket.OPEN) {
@@ -360,6 +388,7 @@ export default function DemoSandbox() {
     setIsCallActive(false);
     setAgentMessage('');
     setIsListening(false);
+    setIsProcessing(false);
     setUserTranscript('');
   };
 
@@ -693,8 +722,10 @@ export default function DemoSandbox() {
                         </motion.div>
                         <p className="text-white font-semibold text-xl mb-2">Call in Progress</p>
                         <div className="flex items-center justify-center space-x-2 mb-4">
-                          <div className={`w-3 h-3 rounded-full ${isListening ? 'bg-green-500 animate-pulse' : 'bg-gray-500'}`} />
-                          <p className="text-gray-400">{isListening ? 'Listening...' : 'Waiting for speech'}</p>
+                          <div className={`w-3 h-3 rounded-full ${isProcessing ? 'bg-blue-500 animate-pulse' : isListening ? 'bg-green-500 animate-pulse' : 'bg-gray-500'}`} />
+                          <p className="text-gray-400">
+                            {isProcessing ? 'Processing your response...' : isListening ? 'Listening...' : 'Waiting for speech'}
+                          </p>
                         </div>
 
                         {/* User Transcript */}
