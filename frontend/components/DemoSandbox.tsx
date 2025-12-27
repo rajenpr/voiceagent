@@ -19,6 +19,7 @@ export default function DemoSandbox() {
   const [isCallActive, setIsCallActive] = useState(false);
   const [step, setStep] = useState(1);
   const [dragActive, setDragActive] = useState(false);
+  const [agentMessage, setAgentMessage] = useState<string>('');
 
   const industries = [
     'Plumber',
@@ -125,16 +126,22 @@ export default function DemoSandbox() {
 
       ws.onopen = () => {
         console.log('WebSocket connected');
-        alert('Voice connection established! Microphone access will be requested next.');
+        setAgentMessage('Connecting to AI agent...');
       };
 
       ws.onmessage = (event) => {
         console.log('Message from server:', event.data);
         try {
           const data = JSON.parse(event.data);
-          if (data.error) {
+
+          if (data.type === 'agent_response') {
+            setAgentMessage(data.text || 'AI is thinking...');
+          } else if (data.error) {
             console.error('Server error:', data.error);
-            alert(`Error: ${data.error}`);
+            setAgentMessage(`Error: ${data.error}`);
+          } else if (data.type === 'call_ended') {
+            setAgentMessage(data.message || 'Call ended');
+            setTimeout(() => setIsCallActive(false), 2000);
           }
         } catch (e) {
           console.log('Non-JSON message:', event.data);
@@ -163,14 +170,18 @@ export default function DemoSandbox() {
   };
 
   const endCall = () => {
-    // Close WebSocket connection if it exists
+    // Send end call message to backend
     const ws = (window as any).voiceWebSocket;
     if (ws && ws.readyState === WebSocket.OPEN) {
-      ws.close();
-      console.log('WebSocket connection closed');
+      ws.send(JSON.stringify({ type: 'end_call' }));
+      setTimeout(() => {
+        ws.close();
+        console.log('WebSocket connection closed');
+      }, 500);
     }
     (window as any).voiceWebSocket = null;
     setIsCallActive(false);
+    setAgentMessage('');
   };
 
   return (
@@ -485,7 +496,23 @@ export default function DemoSandbox() {
                           </svg>
                         </motion.div>
                         <p className="text-white font-semibold text-xl mb-2">Call in Progress</p>
-                        <p className="text-gray-400">Speak naturally - the AI is listening</p>
+                        <p className="text-gray-400">The AI agent is speaking</p>
+
+                        {/* Agent Message Display */}
+                        {agentMessage && (
+                          <motion.div
+                            initial={{ opacity: 0, y: 10 }}
+                            animate={{ opacity: 1, y: 0 }}
+                            className="mt-6 p-6 bg-slate-800/50 border border-white/10 rounded-xl max-w-md"
+                          >
+                            <div className="flex items-start space-x-3">
+                              <svg className="w-6 h-6 text-stripe-purple flex-shrink-0 mt-1" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                                <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M8 10h.01M12 10h.01M16 10h.01M9 16H5a2 2 0 01-2-2V6a2 2 0 012-2h14a2 2 0 012 2v8a2 2 0 01-2 2h-5l-5 5v-5z" />
+                              </svg>
+                              <p className="text-white text-lg leading-relaxed">{agentMessage}</p>
+                            </div>
+                          </motion.div>
+                        )}
                       </div>
 
                       <button
