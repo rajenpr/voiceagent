@@ -77,12 +77,99 @@ export default function DemoSandbox() {
   };
 
   const startCall = async () => {
-    setIsCallActive(true);
-    // This will connect to the backend WebRTC endpoint
-    console.log('Starting call with:', { formData, uploadedFiles });
+    try {
+      setIsCallActive(true);
+
+      const apiUrl = process.env.NEXT_PUBLIC_API_URL || 'http://localhost:8000';
+
+      // Step 1: Create session with business config
+      const sessionResponse = await fetch(`${apiUrl}/api/session/create`, {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({
+          business_name: formData.businessName,
+          industry: formData.industry,
+          primary_goal: formData.primaryGoal,
+        }),
+      });
+
+      if (!sessionResponse.ok) {
+        throw new Error('Failed to create session');
+      }
+
+      const { session_id } = await sessionResponse.json();
+      console.log('Session created:', session_id);
+
+      // Step 2: Upload files if any
+      if (uploadedFiles.length > 0) {
+        const formDataUpload = new FormData();
+        uploadedFiles.forEach((file) => {
+          formDataUpload.append('files', file);
+        });
+
+        const uploadResponse = await fetch(`${apiUrl}/api/upload/${session_id}`, {
+          method: 'POST',
+          body: formDataUpload,
+        });
+
+        if (!uploadResponse.ok) {
+          console.warn('File upload failed, continuing without files');
+        } else {
+          console.log('Files uploaded successfully');
+        }
+      }
+
+      // Step 3: Connect to WebSocket for voice
+      const wsUrl = process.env.NEXT_PUBLIC_WS_URL || 'ws://localhost:8000';
+      const ws = new WebSocket(`${wsUrl}/ws/voice/${session_id}`);
+
+      ws.onopen = () => {
+        console.log('WebSocket connected');
+        alert('Voice connection established! Microphone access will be requested next.');
+      };
+
+      ws.onmessage = (event) => {
+        console.log('Message from server:', event.data);
+        try {
+          const data = JSON.parse(event.data);
+          if (data.error) {
+            console.error('Server error:', data.error);
+            alert(`Error: ${data.error}`);
+          }
+        } catch (e) {
+          console.log('Non-JSON message:', event.data);
+        }
+      };
+
+      ws.onerror = (error) => {
+        console.error('WebSocket error:', error);
+        alert('Connection error. Check console for details.');
+        setIsCallActive(false);
+      };
+
+      ws.onclose = () => {
+        console.log('WebSocket closed');
+        setIsCallActive(false);
+      };
+
+      // Store WebSocket reference for cleanup
+      (window as any).voiceWebSocket = ws;
+
+    } catch (error) {
+      console.error('Error starting call:', error);
+      alert(`Failed to start call: ${error instanceof Error ? error.message : 'Unknown error'}`);
+      setIsCallActive(false);
+    }
   };
 
   const endCall = () => {
+    // Close WebSocket connection if it exists
+    const ws = (window as any).voiceWebSocket;
+    if (ws && ws.readyState === WebSocket.OPEN) {
+      ws.close();
+      console.log('WebSocket connection closed');
+    }
+    (window as any).voiceWebSocket = null;
     setIsCallActive(false);
   };
 
