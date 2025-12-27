@@ -7,6 +7,7 @@ interface FormData {
   businessName: string;
   industry: string;
   primaryGoal: string;
+  systemInstructions: string;
 }
 
 export default function DemoSandbox() {
@@ -14,6 +15,7 @@ export default function DemoSandbox() {
     businessName: '',
     industry: '',
     primaryGoal: '',
+    systemInstructions: 'You are a helpful AI assistant. For appointment booking:\n1. Greet the caller warmly\n2. Ask for their name\n3. Ask for their phone number\n4. Ask for their preferred date and time\n5. Ask for the reason for their appointment\n6. Confirm all details back to them\n7. Let them know the appointment is booked and they\'ll receive a confirmation',
   });
   const [uploadedFiles, setUploadedFiles] = useState<File[]>([]);
   const [isCallActive, setIsCallActive] = useState(false);
@@ -43,7 +45,7 @@ export default function DemoSandbox() {
     'Information Queries',
   ];
 
-  const handleInputChange = (e: React.ChangeEvent<HTMLInputElement | HTMLSelectElement>) => {
+  const handleInputChange = (e: React.ChangeEvent<HTMLInputElement | HTMLSelectElement | HTMLTextAreaElement>) => {
     setFormData({ ...formData, [e.target.name]: e.target.value });
   };
 
@@ -181,6 +183,7 @@ export default function DemoSandbox() {
           business_name: formData.businessName,
           industry: formData.industry,
           primary_goal: formData.primaryGoal,
+          system_instructions: formData.systemInstructions,
         }),
       });
 
@@ -405,6 +408,23 @@ export default function DemoSandbox() {
                       </option>
                     ))}
                   </select>
+                </div>
+
+                <div>
+                  <label className="block text-white font-semibold mb-2">
+                    System Instructions (How should the AI behave?)
+                  </label>
+                  <textarea
+                    name="systemInstructions"
+                    value={formData.systemInstructions}
+                    onChange={handleInputChange}
+                    rows={8}
+                    placeholder="Enter detailed instructions for how the AI should handle conversations..."
+                    className="w-full px-4 py-3 bg-slate-800/50 border border-white/10 rounded-lg text-white placeholder-gray-400 focus:border-stripe-purple focus:outline-none transition-colors resize-none font-mono text-sm"
+                  />
+                  <p className="text-gray-400 text-xs mt-2">
+                    💡 Tip: Be specific about the steps the AI should follow (e.g., "First ask for name, then phone number, then preferred appointment time...")
+                  </p>
                 </div>
 
                 <button

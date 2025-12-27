@@ -48,17 +48,38 @@ class VoicePipeline:
         business_name = self.business_config.get("business_name", "our business")
         industry = self.business_config.get("industry", "service")
         primary_goal = self.business_config.get("primary_goal", "assist customers")
+        system_instructions = self.business_config.get("system_instructions", "")
 
         # Get relevant context from RAG
         context = await self.rag_service.get_context(self.session_id, "")
 
-        prompt = f"""You are an AI voice assistant for {business_name}, a {industry} business.
+        # Use custom instructions if provided, otherwise use default
+        if system_instructions:
+            prompt = f"""You are an AI voice assistant for {business_name}, a {industry} business.
+
+Your primary goal is to: {primary_goal}
+
+CUSTOM INSTRUCTIONS:
+{system_instructions}
+
+Business Context:
+{context if context else "No additional context provided. Use general knowledge about the industry."}
+
+IMPORTANT RULES:
+- Keep responses VERY concise (1-2 sentences max) for natural phone conversation flow
+- Speak naturally and conversationally, as if on a phone call
+- Always identify yourself as an AI assistant
+- Be honest if you don't have information
+- Follow the custom instructions step-by-step
+"""
+        else:
+            prompt = f"""You are an AI voice assistant for {business_name}, a {industry} business.
 
 Your primary goal is to: {primary_goal}
 
 Key Instructions:
 1. Be professional, friendly, and conversational
-2. Keep responses concise (2-3 sentences max) for natural conversation flow
+2. Keep responses concise (1-2 sentences max) for natural conversation flow
 3. Ask clarifying questions when needed
 4. If booking appointments, collect: name, phone, preferred date/time, and reason for service
 5. For lead qualification, assess: urgency, budget, timeline, and decision-making authority
@@ -75,31 +96,62 @@ Important:
 """
         return prompt
 
-    async def handle_user_speech(self, transcript: str) -> str:
+    async def handle_user_speech(self, transcript: str, conversation_history: list = None) -> str:
         """
-        Process user speech and generate response using RAG-enhanced LLM
+        Process user speech and generate response using Groq LLM
         """
         try:
+            if not self.groq_api_key or self.groq_api_key == "your_groq_api_key_here":
+                # Fallback if Groq is not configured
+                return f"I understand you're asking about: {transcript}. How can I help you further with {self.business_config['business_name']}?"
+
             # Get relevant context from knowledge base
             context = await self.rag_service.get_context(self.session_id, transcript)
 
-            # Build prompt with context
+            # Build system prompt with context
             system_prompt = await self.create_system_prompt()
 
-            # In production, this would call Groq LLM
-            # response = await self.llm.generate(
-            #     system_prompt=system_prompt,
-            #     user_message=transcript,
-            #     context=context,
-            # )
+            # Build conversation messages
+            messages = [
+                {"role": "system", "content": system_prompt}
+            ]
 
-            # Placeholder response for demonstration
-            response = f"I understand you're asking about: {transcript}. How can I help you further with {self.business_config['business_name']}?"
+            # Add conversation history if available
+            if conversation_history:
+                messages.extend(conversation_history)
 
-            return response
+            # Add current user message
+            messages.append({"role": "user", "content": transcript})
+
+            # Call Groq LLM
+            async with httpx.AsyncClient() as client:
+                response = await client.post(
+                    "https://api.groq.com/openai/v1/chat/completions",
+                    headers={
+                        "Authorization": f"Bearer {self.groq_api_key}",
+                        "Content-Type": "application/json"
+                    },
+                    json={
+                        "model": "mixtral-8x7b-32768",  # Fast, capable model
+                        "messages": messages,
+                        "temperature": 0.7,
+                        "max_tokens": 150,  # Keep responses concise for voice
+                    },
+                    timeout=10.0
+                )
+
+                if response.status_code == 200:
+                    result = response.json()
+                    assistant_message = result["choices"][0]["message"]["content"]
+                    return assistant_message.strip()
+                else:
+                    print(f"Groq API error: {response.status_code} - {response.text}")
+                    return "I apologize, but I'm having trouble processing that. Could you please repeat?"
 
         except Exception as e:
             print(f"Error processing speech: {e}")
+            import traceback
+            traceback.print_exc()
             return "I apologize, but I'm having trouble processing that. Could you please repeat?"
 
     async def generate_speech(self, text: str) -> str:
@@ -150,6 +202,9 @@ Important:
         Orchestrates the flow: WebRTC -> VAD -> ASR -> LLM -> TTS -> WebRTC
         """
         try:
+            # Initialize conversation history
+            conversation_history = []
+
             # Send initial greeting
             greeting = f"Hello! Thank you for contacting {self.business_config['business_name']}. How can I assist you today?"
 
@@ -162,6 +217,9 @@ Important:
                 "audio": greeting_audio,  # Base64 encoded MP3
             })
 
+            # Add greeting to history
+            conversation_history.append({"role": "assistant", "content": greeting})
+
             # Main conversation loop
             while True:
                 # Receive audio or text from client
@@ -170,8 +228,18 @@ Important:
                 if data.get("type") == "user_speech":
                     transcript = data.get("text", "")
 
-                    # Process with LLM
-                    response = await self.handle_user_speech(transcript)
+                    # Add user message to history
+                    conversation_history.append({"role": "user", "content": transcript})
+
+                    # Process with LLM (pass conversation history)
+                    response = await self.handle_user_speech(transcript, conversation_history)
+
+                    # Add assistant response to history
+                    conversation_history.append({"role": "assistant", "content": response})
+
+                    # Keep only last 10 messages to avoid context overflow
+                    if len(conversation_history) > 10:
+                        conversation_history = conversation_history[-10:]
 
                     # Generate audio for response
                     response_audio = await self.generate_speech(response)
@@ -196,6 +264,8 @@ Important:
 
         except Exception as e:
             print(f"Pipeline error: {e}")
+            import traceback
+            traceback.print_exc()
             await websocket.send_json({
                 "type": "error",
                 "message": "An error occurred during the call.",

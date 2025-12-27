@@ -42,6 +42,7 @@ class BusinessConfig(BaseModel):
     business_name: str
     industry: str
     primary_goal: str
+    system_instructions: Optional[str] = None
     session_id: Optional[str] = None
 
 
