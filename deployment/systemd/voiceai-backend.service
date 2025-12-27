@@ -1,0 +1,38 @@
+[Unit]
+Description=Voice AI Backend API Service
+After=network.target
+
+[Service]
+Type=simple
+User=YOUR_USERNAME
+Group=YOUR_USERNAME
+WorkingDirectory=/home/YOUR_USERNAME/voiceagent/backend
+
+# Environment
+Environment="PATH=/home/YOUR_USERNAME/voiceagent/backend/venv/bin:/usr/local/bin:/usr/bin:/bin"
+Environment="PYTHONUNBUFFERED=1"
+
+# Start command using uvicorn directly for better control
+ExecStart=/home/YOUR_USERNAME/voiceagent/backend/venv/bin/uvicorn app.main:app \
+    --host 0.0.0.0 \
+    --port 8000 \
+    --workers 2 \
+    --log-level info
+
+# Restart policy
+Restart=always
+RestartSec=10
+StartLimitInterval=60
+StartLimitBurst=3
+
+# Security settings
+NoNewPrivileges=true
+PrivateTmp=true
+
+# Logging
+StandardOutput=journal
+StandardError=journal
+SyslogIdentifier=voiceai-backend
+
+[Install]
+WantedBy=multi-user.target

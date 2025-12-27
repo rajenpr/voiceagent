@@ -75,8 +75,41 @@ Step 3: Live Test Call
 
 ## 🚀 Quick Start
 
-### **Prerequisites**
+**Choose your deployment method:**
 
+### 🐧 **Linux VM Deployment (Recommended for Production)**
+
+For production deployment on Ubuntu/Debian Linux servers:
+
+```bash
+# 1. Clone repository
+git clone <your-repo-url> voiceagent
+cd voiceagent
+
+# 2. Install prerequisites
+sudo bash scripts/setup-prerequisites.sh
+
+# 3. Configure API keys
+cd backend && cp .env.example .env
+nano .env  # Add your API keys
+
+# 4. Deploy everything
+cd ..
+bash scripts/deploy-all.sh
+```
+
+**📚 Full Documentation**: See [docs/LINUX_DEPLOYMENT.md](docs/LINUX_DEPLOYMENT.md) for complete setup guide
+**⚡ Quick Reference**: See [docs/QUICKSTART.md](docs/QUICKSTART.md) for 10-minute setup
+
+### 🐳 **Docker Deployment**
+
+```bash
+docker-compose up -d
+```
+
+### 💻 **Local Development**
+
+**Prerequisites:**
 - Node.js 18+ (for frontend)
 - Python 3.10+ (for backend)
 - API Keys:

@@ -1,0 +1,35 @@
+[Unit]
+Description=Voice AI Frontend Next.js Service
+After=network.target
+
+[Service]
+Type=simple
+User=YOUR_USERNAME
+Group=YOUR_USERNAME
+WorkingDirectory=/home/YOUR_USERNAME/voiceagent/frontend
+
+# Environment
+Environment="NODE_ENV=production"
+Environment="PORT=3000"
+Environment="PATH=/usr/local/bin:/usr/bin:/bin"
+
+# Start command
+ExecStart=/usr/bin/npm start
+
+# Restart policy
+Restart=always
+RestartSec=10
+StartLimitInterval=60
+StartLimitBurst=3
+
+# Security settings
+NoNewPrivileges=true
+PrivateTmp=true
+
+# Logging
+StandardOutput=journal
+StandardError=journal
+SyslogIdentifier=voiceai-frontend
+
+[Install]
+WantedBy=multi-user.target
