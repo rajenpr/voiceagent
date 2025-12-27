@@ -55,10 +55,37 @@ async def root():
     }
 
 
-@app.post("/api/upload")
+@app.post("/api/session/create")
+async def create_session(config: BusinessConfig):
+    """
+    Create a new session and configure the voice agent
+    """
+    try:
+        import uuid
+
+        # Generate unique session ID
+        session_id = str(uuid.uuid4())
+
+        # Initialize knowledge base for this session
+        await rag_service.initialize_session(session_id, config.dict())
+
+        return JSONResponse(
+            content={
+                "success": True,
+                "session_id": session_id,
+                "message": f"Session created for {config.business_name}",
+            }
+        )
+
+    except Exception as e:
+        print(f"Error creating session: {e}")
+        raise HTTPException(status_code=500, detail=str(e))
+
+
+@app.post("/api/upload/{session_id}")
 async def upload_files(
+    session_id: str,
     files: List[UploadFile] = File(...),
-    session_id: str = Form(...),
 ):
     """
     Upload business documents for RAG knowledge base
