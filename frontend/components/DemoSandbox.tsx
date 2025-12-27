@@ -121,6 +121,7 @@ export default function DemoSandbox() {
 
     let interimTimeout: NodeJS.Timeout | null = null;
     let lastInterimTranscript = '';
+    let lastSentTranscript = ''; // Track what was already sent
 
     recognition.onstart = () => {
       setIsListening(true);
@@ -150,15 +151,24 @@ export default function DemoSandbox() {
           interimTimeout = null;
         }
 
-        // Send to backend
-        const ws = (window as any).voiceWebSocket;
-        if (ws && ws.readyState === WebSocket.OPEN) {
-          console.log('Sending to backend:', finalTranscript);
-          ws.send(JSON.stringify({
-            type: 'user_speech',
-            text: finalTranscript,
-          }));
+        // Only send if different from what was already sent via timeout
+        const trimmedFinal = finalTranscript.trim();
+        if (trimmedFinal && trimmedFinal !== lastSentTranscript) {
+          const ws = (window as any).voiceWebSocket;
+          if (ws && ws.readyState === WebSocket.OPEN) {
+            console.log('Sending final to backend:', finalTranscript);
+            ws.send(JSON.stringify({
+              type: 'user_speech',
+              text: finalTranscript,
+            }));
+            lastSentTranscript = trimmedFinal;
+          }
+        } else {
+          console.log('Skipping duplicate final transcript');
         }
+
+        // Clear interim tracking
+        lastInterimTranscript = '';
       } else if (interimTranscript) {
         console.log('Interim transcript:', interimTranscript);
         setUserTranscript(interimTranscript);
@@ -171,7 +181,8 @@ export default function DemoSandbox() {
 
         // Set timeout to send interim transcript if no final comes through
         interimTimeout = setTimeout(() => {
-          if (lastInterimTranscript) {
+          const trimmedInterim = lastInterimTranscript.trim();
+          if (trimmedInterim && trimmedInterim !== lastSentTranscript) {
             console.log('Timeout - sending interim transcript:', lastInterimTranscript);
             const ws = (window as any).voiceWebSocket;
             if (ws && ws.readyState === WebSocket.OPEN) {
@@ -179,15 +190,23 @@ export default function DemoSandbox() {
                 type: 'user_speech',
                 text: lastInterimTranscript,
               }));
-              lastInterimTranscript = '';
+              lastSentTranscript = trimmedInterim;
             }
           }
-        }, 1500); // Send after 1.5 seconds of no final transcript
+          lastInterimTranscript = '';
+        }, 2000); // Increased to 2 seconds
       }
     };
 
     recognition.onerror = (event: any) => {
       console.error('Speech recognition error:', event.error);
+
+      // Don't stop listening on "no-speech" error - just restart
+      if (event.error === 'no-speech') {
+        console.log('No speech detected, continuing to listen...');
+        return;
+      }
+
       setIsListening(false);
       if (interimTimeout) {
         clearTimeout(interimTimeout);
@@ -195,13 +214,21 @@ export default function DemoSandbox() {
     };
 
     recognition.onend = () => {
-      setIsListening(false);
+      console.log('Speech recognition ended, restarting...');
       if (interimTimeout) {
         clearTimeout(interimTimeout);
       }
       // Auto-restart if call is still active
       if ((window as any).voiceWebSocket?.readyState === WebSocket.OPEN) {
-        recognition.start();
+        setTimeout(() => {
+          try {
+            recognition.start();
+          } catch (e) {
+            console.log('Recognition already started');
+          }
+        }, 100);
+      } else {
+        setIsListening(false);
       }
     };
 
