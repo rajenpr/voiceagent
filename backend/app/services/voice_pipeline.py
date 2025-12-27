@@ -132,7 +132,7 @@ Important:
                         "Content-Type": "application/json"
                     },
                     json={
-                        "model": "mixtral-8x7b-32768",  # Fast, capable model
+                        "model": "llama-3.3-70b-versatile",  # Fast, capable model
                         "messages": messages,
                         "temperature": 0.7,
                         "max_tokens": 150,  # Keep responses concise for voice
