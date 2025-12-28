@@ -401,13 +401,13 @@ export default function DemoSandbox() {
           viewport={{ once: true }}
           className="text-center mb-12"
         >
-          <h2 className="text-5xl md:text-6xl font-bold text-white mb-6">
+          <h2 className="text-5xl md:text-6xl font-bold text-[#0A2540] mb-6">
             Try It{' '}
-            <span className="bg-gradient-to-r from-stripe-purple to-stripe-lightBlue bg-clip-text text-transparent">
+            <span className="text-[#635BFF]">
               Live
             </span>
           </h2>
-          <p className="text-xl text-gray-300 max-w-2xl mx-auto">
+          <p className="text-xl text-[#425466] max-w-2xl mx-auto">
             Experience the power of real-time voice AI. Upload your business information
             and have a conversation in seconds.
           </p>
@@ -417,7 +417,7 @@ export default function DemoSandbox() {
           initial={{ opacity: 0, scale: 0.95 }}
           whileInView={{ opacity: 1, scale: 1 }}
           viewport={{ once: true }}
-          className="bg-gradient-to-br from-slate-800/50 to-slate-900/50 backdrop-blur-sm border border-white/10 rounded-2xl p-8 shadow-2xl"
+          className="bg-white border border-gray-200 rounded-2xl p-8 shadow-lg"
         >
           {/* Progress Steps */}
           <div className="flex justify-between mb-12">
@@ -427,13 +427,13 @@ export default function DemoSandbox() {
                   <div
                     className={`w-12 h-12 rounded-full flex items-center justify-center font-bold transition-all ${
                       step >= s
-                        ? 'bg-gradient-to-r from-stripe-purple to-stripe-lightBlue text-white'
-                        : 'bg-slate-700 text-gray-400'
+                        ? 'bg-[#635BFF] text-white'
+                        : 'bg-gray-100 text-gray-400 border-2 border-gray-200'
                     }`}
                   >
                     {s}
                   </div>
-                  <div className={`mt-2 text-sm ${step >= s ? 'text-white' : 'text-gray-400'}`}>
+                  <div className={`mt-2 text-sm font-medium ${step >= s ? 'text-[#0A2540]' : 'text-gray-400'}`}>
                     {s === 1 && 'Business Info'}
                     {s === 2 && 'Upload Docs'}
                     {s === 3 && 'Test Call'}
@@ -442,7 +442,7 @@ export default function DemoSandbox() {
                 {s < 3 && (
                   <div
                     className={`h-1 flex-1 mx-4 rounded ${
-                      step > s ? 'bg-gradient-to-r from-stripe-purple to-stripe-lightBlue' : 'bg-slate-700'
+                      step > s ? 'bg-[#635BFF]' : 'bg-gray-200'
                     }`}
                   />
                 )}
@@ -461,24 +461,24 @@ export default function DemoSandbox() {
                 className="space-y-6"
               >
                 <div>
-                  <label className="block text-white font-semibold mb-2">Business Name</label>
+                  <label className="block text-[#0A2540] font-semibold mb-2">Business Name</label>
                   <input
                     type="text"
                     name="businessName"
                     value={formData.businessName}
                     onChange={handleInputChange}
                     placeholder="e.g., Quick Fix Plumbing"
-                    className="w-full px-4 py-3 bg-slate-800/50 border border-white/10 rounded-lg text-white placeholder-gray-400 focus:border-stripe-purple focus:outline-none transition-colors"
+                    className="w-full px-4 py-3 bg-white border border-gray-300 rounded-md text-[#0A2540] placeholder-gray-400 focus:border-[#635BFF] focus:ring-2 focus:ring-[#635BFF]/20 focus:outline-none transition-all"
                   />
                 </div>
 
                 <div>
-                  <label className="block text-white font-semibold mb-2">Industry</label>
+                  <label className="block text-[#0A2540] font-semibold mb-2">Industry</label>
                   <select
                     name="industry"
                     value={formData.industry}
                     onChange={handleInputChange}
-                    className="w-full px-4 py-3 bg-slate-800/50 border border-white/10 rounded-lg text-white focus:border-stripe-purple focus:outline-none transition-colors"
+                    className="w-full px-4 py-3 bg-white border border-gray-300 rounded-md text-[#0A2540] focus:border-[#635BFF] focus:ring-2 focus:ring-[#635BFF]/20 focus:outline-none transition-all"
                   >
                     <option value="">Select your industry</option>
                     {industries.map((industry) => (
@@ -490,12 +490,12 @@ export default function DemoSandbox() {
                 </div>
 
                 <div>
-                  <label className="block text-white font-semibold mb-2">Primary Goal</label>
+                  <label className="block text-[#0A2540] font-semibold mb-2">Primary Goal</label>
                   <select
                     name="primaryGoal"
                     value={formData.primaryGoal}
                     onChange={handleInputChange}
-                    className="w-full px-4 py-3 bg-slate-800/50 border border-white/10 rounded-lg text-white focus:border-stripe-purple focus:outline-none transition-colors"
+                    className="w-full px-4 py-3 bg-white border border-gray-300 rounded-md text-[#0A2540] focus:border-[#635BFF] focus:ring-2 focus:ring-[#635BFF]/20 focus:outline-none transition-all"
                   >
                     <option value="">What should the AI help with?</option>
                     {goals.map((goal) => (
@@ -507,7 +507,7 @@ export default function DemoSandbox() {
                 </div>
 
                 <div>
-                  <label className="block text-white font-semibold mb-2">
+                  <label className="block text-[#0A2540] font-semibold mb-2">
                     System Instructions (How should the AI behave?)
                   </label>
                   <textarea
@@ -516,7 +516,7 @@ export default function DemoSandbox() {
                     onChange={handleInputChange}
                     rows={8}
                     placeholder="Enter detailed instructions for how the AI should handle conversations..."
-                    className="w-full px-4 py-3 bg-slate-800/50 border border-white/10 rounded-lg text-white placeholder-gray-400 focus:border-stripe-purple focus:outline-none transition-colors resize-none font-mono text-sm"
+                    className="w-full px-4 py-3 bg-white border border-gray-300 rounded-md text-[#0A2540] placeholder-gray-400 focus:border-[#635BFF] focus:ring-2 focus:ring-[#635BFF]/20 focus:outline-none transition-all resize-none font-mono text-sm"
                   />
                   <p className="text-gray-400 text-xs mt-2">
                     💡 Tip: Be specific about the steps the AI should follow (e.g., &ldquo;First ask for name, then phone number, then preferred appointment time...&rdquo;)
@@ -526,7 +526,7 @@ export default function DemoSandbox() {
                 <button
                   onClick={() => setStep(2)}
                   disabled={!formData.businessName || !formData.industry || !formData.primaryGoal}
-                  className="w-full px-6 py-4 bg-gradient-to-r from-stripe-purple to-stripe-lightBlue text-white rounded-lg font-semibold shadow-lg hover:shadow-xl transition-all disabled:opacity-50 disabled:cursor-not-allowed transform hover:scale-[1.02]"
+                  className="w-full px-6 py-4 bg-[#635BFF] hover:bg-[#7A73FF] text-white rounded-md font-semibold shadow-sm hover:shadow-md transition-all disabled:opacity-50 disabled:cursor-not-allowed disabled:hover:bg-[#635BFF]"
                 >
                   Continue to Upload
                 </button>
@@ -549,8 +549,8 @@ export default function DemoSandbox() {
                   onDrop={handleDrop}
                   className={`border-2 border-dashed rounded-xl p-12 text-center transition-all ${
                     dragActive
-                      ? 'border-stripe-purple bg-stripe-purple/10'
-                      : 'border-white/20 hover:border-stripe-purple/50'
+                      ? 'border-[#635BFF] bg-[#635BFF]/5'
+                      : 'border-gray-300 hover:border-[#635BFF]/50 bg-gray-50'
                   }`}
                 >
                   <svg
@@ -566,10 +566,10 @@ export default function DemoSandbox() {
                       d="M7 16a4 4 0 01-.88-7.903A5 5 0 1115.9 6L16 6a5 5 0 011 9.9M15 13l-3-3m0 0l-3 3m3-3v12"
                     />
                   </svg>
-                  <p className="text-white font-semibold mb-2">
+                  <p className="text-[#0A2540] font-semibold mb-2">
                     Drop your files here or click to browse
                   </p>
-                  <p className="text-gray-400 text-sm mb-4">
+                  <p className="text-[#425466] text-sm mb-4">
                     PDF, TXT, or DOCX files (Service menus, pricing, FAQs)
                   </p>
                   <input
