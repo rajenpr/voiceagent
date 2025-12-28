@@ -51,7 +51,7 @@ export default function MeshGradient() {
       });
 
       // Draw gradients with subtle blend
-      ctx.globalCompositeOperation = 'normal';
+      ctx.globalCompositeOperation = 'source-over';
       gradients.forEach(({ gradient }) => {
         ctx.fillStyle = gradient;
         ctx.fillRect(0, 0, canvas.width, canvas.height);
