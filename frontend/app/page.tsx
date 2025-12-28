@@ -3,6 +3,7 @@ import Navigation from '@/components/Navigation';
 import HeroSection from '@/components/HeroSection';
 import DemoSandbox from '@/components/DemoSandbox';
 import FeaturesSection from '@/components/FeaturesSection';
+import PricingSection from '@/components/PricingSection';
 import Footer from '@/components/Footer';
 
 export default function Home() {
@@ -13,6 +14,7 @@ export default function Home() {
       <HeroSection />
       <DemoSandbox />
       <FeaturesSection />
+      <PricingSection />
       <Footer />
     </main>
   );
