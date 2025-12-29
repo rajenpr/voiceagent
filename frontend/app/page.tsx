@@ -1,7 +1,7 @@
 import MeshGradient from '@/components/MeshGradient';
 import Navigation from '@/components/Navigation';
 import HeroSection from '@/components/HeroSection';
-import DemoSandbox from '@/components/DemoSandbox';
+import DemoPhones from '@/components/DemoPhones';
 import FeaturesSection from '@/components/FeaturesSection';
 import PricingSection from '@/components/PricingSection';
 import Footer from '@/components/Footer';
@@ -12,7 +12,7 @@ export default function Home() {
       <MeshGradient />
       <Navigation />
       <HeroSection />
-      <DemoSandbox />
+      <DemoPhones />
       <FeaturesSection />
       <PricingSection />
       <Footer />
