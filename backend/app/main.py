@@ -239,6 +239,142 @@ async def delete_session(session_id: str):
 
 
 # ============================================================================
+# ADMIN ENDPOINTS (Multi-Tenant Client Management)
+# ============================================================================
+
+@app.get("/api/admin/clients")
+async def list_all_clients():
+    """
+    List all provisioned clients/sessions
+    Returns summary of all active sessions with business info
+    """
+    try:
+        sessions = await rag_service.get_all_sessions()
+
+        return JSONResponse(
+            content={
+                "success": True,
+                "total_clients": len(sessions),
+                "clients": sessions,
+            }
+        )
+
+    except Exception as e:
+        raise HTTPException(status_code=500, detail=str(e))
+
+
+@app.get("/api/admin/client/{session_id}/stats")
+async def get_client_stats(session_id: str):
+    """
+    Get detailed statistics for a specific client
+    Including call volume, document count, configuration
+    """
+    try:
+        config = await rag_service.get_session_config(session_id)
+
+        if not config:
+            raise HTTPException(status_code=404, detail="Client not found")
+
+        # Get document count
+        doc_count = await rag_service.get_document_count(session_id)
+
+        # Get call stats from Twilio voice service
+        from app.services.twilio_voice_service import active_sessions
+        call_sessions = [k for k, v in active_sessions.items() if v.session_id == session_id]
+
+        return JSONResponse(
+            content={
+                "success": True,
+                "session_id": session_id,
+                "business_name": config.get("business_name"),
+                "industry": config.get("industry"),
+                "primary_goal": config.get("primary_goal"),
+                "documents_uploaded": doc_count,
+                "active_calls": len(call_sessions),
+                "configuration": config,
+            }
+        )
+
+    except HTTPException:
+        raise
+    except Exception as e:
+        raise HTTPException(status_code=500, detail=str(e))
+
+
+@app.put("/api/admin/client/{session_id}/config")
+async def update_client_config(session_id: str, config: BusinessConfig):
+    """
+    Update configuration for an existing client
+    Allows changing business name, industry, goals, etc.
+    """
+    try:
+        # Verify session exists
+        existing_config = await rag_service.get_session_config(session_id)
+
+        if not existing_config:
+            raise HTTPException(status_code=404, detail="Client not found")
+
+        # Update configuration
+        updated_config = config.dict()
+        updated_config['session_id'] = session_id
+        await rag_service.update_session_config(session_id, updated_config)
+
+        return JSONResponse(
+            content={
+                "success": True,
+                "session_id": session_id,
+                "message": f"Configuration updated for {config.business_name}",
+                "config": updated_config,
+            }
+        )
+
+    except HTTPException:
+        raise
+    except Exception as e:
+        raise HTTPException(status_code=500, detail=str(e))
+
+
+@app.get("/api/admin/stats/overview")
+async def get_platform_overview():
+    """
+    Get platform-wide statistics for SaaS dashboard
+    Total clients, total calls, revenue metrics, etc.
+    """
+    try:
+        sessions = await rag_service.get_all_sessions()
+        from app.services.twilio_voice_service import active_sessions
+
+        # Calculate metrics
+        total_clients = len(sessions)
+        active_calls = len(active_sessions)
+
+        # Revenue calculations (based on your pricing)
+        # Assume clients are on $99 or $299 plans
+        estimated_monthly_revenue = total_clients * 199  # Average of $99 and $299
+
+        # Cost calculations
+        monthly_phone_cost = total_clients * 1.15  # $1.15 per Twilio number
+        # Call costs calculated per-call, not monthly fixed
+
+        return JSONResponse(
+            content={
+                "success": True,
+                "platform_stats": {
+                    "total_clients": total_clients,
+                    "active_calls": active_calls,
+                    "estimated_monthly_revenue": f"${estimated_monthly_revenue:,.2f}",
+                    "monthly_fixed_costs": f"${monthly_phone_cost:.2f}",
+                    "estimated_profit_margin": "~90%",
+                },
+                "recent_clients": sessions[:10]  # Last 10 clients
+            }
+        )
+
+    except Exception as e:
+        raise HTTPException(status_code=500, detail=str(e))
+
+
+# ============================================================================
 # TWILIO VOICE ENDPOINTS (Phone-based Voice AI)
 # ============================================================================
 

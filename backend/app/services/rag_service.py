@@ -210,6 +210,36 @@ Use this information to provide accurate, business-specific responses.
             return len(self.sessions[session_id].get("documents", []))
         return 0
 
+    async def get_all_sessions(self) -> List[Dict[str, Any]]:
+        """
+        Get all active sessions with their configurations
+        Used for admin dashboard to list all clients
+        """
+        sessions_list = []
+        for session_id, session_data in self.sessions.items():
+            config = session_data.get("config", {})
+            sessions_list.append({
+                "session_id": session_id,
+                "business_name": config.get("business_name", "Unknown"),
+                "industry": config.get("industry", "N/A"),
+                "primary_goal": config.get("primary_goal", "N/A"),
+                "documents_count": len(session_data.get("documents", [])),
+                "created_at": session_data.get("created_at", "N/A"),
+            })
+        return sessions_list
+
+    async def update_session_config(self, session_id: str, updated_config: Dict[str, Any]):
+        """
+        Update configuration for an existing session
+        Allows modifying business settings without recreating the session
+        """
+        if session_id not in self.sessions:
+            raise ValueError(f"Session {session_id} not found")
+
+        # Update only the config, preserve documents and other data
+        self.sessions[session_id]["config"] = updated_config
+        self._save_sessions()
+
     async def delete_session(self, session_id: str):
         """
         Delete a session and its associated data
