@@ -3,9 +3,9 @@ Main FastAPI application for Voice AI Agent SaaS Platform
 Powered by Pipecat.ai for low-latency voice interactions
 """
 
-from fastapi import FastAPI, WebSocket, UploadFile, File, Form, HTTPException
+from fastapi import FastAPI, WebSocket, UploadFile, File, Form, HTTPException, Request
 from fastapi.middleware.cors import CORSMiddleware
-from fastapi.responses import JSONResponse
+from fastapi.responses import JSONResponse, Response
 from pydantic import BaseModel
 from typing import List, Optional
 import os
@@ -13,6 +13,7 @@ from dotenv import load_dotenv
 
 from app.services.voice_pipeline import VoicePipeline
 from app.services.rag_service import RAGService
+from app.services.twilio_voice_service import get_or_create_session, cleanup_session
 
 # Load environment variables
 load_dotenv()
@@ -235,6 +236,131 @@ async def delete_session(session_id: str):
 
     except Exception as e:
         raise HTTPException(status_code=500, detail=str(e))
+
+
+# ============================================================================
+# TWILIO VOICE ENDPOINTS (Phone-based Voice AI)
+# ============================================================================
+
+@app.post("/api/twilio/voice/incoming/{session_id}")
+async def twilio_incoming_call(request: Request, session_id: str):
+    """
+    Twilio webhook for incoming calls
+    Returns TwiML to handle the call
+    """
+    try:
+        # Get form data from Twilio
+        form_data = await request.form()
+        call_sid = form_data.get("CallSid")
+
+        # Get session configuration
+        config = await rag_service.get_session_config(session_id)
+        if not config:
+            # Return error TwiML
+            from twilio.twiml.voice_response import VoiceResponse
+            response = VoiceResponse()
+            response.say("Sorry, this number is not configured. Please contact support.")
+            response.hangup()
+            return Response(content=str(response), media_type="application/xml")
+
+        # Create or get voice service for this call
+        voice_service = get_or_create_session(call_sid, session_id, config, rag_service)
+
+        # Generate callback URL for gathering speech
+        base_url = os.getenv("BASE_URL", "https://your-domain.com")
+        callback_url = f"{base_url}/api/twilio/voice/gather/{session_id}/{call_sid}"
+
+        # Create greeting TwiML
+        twiml = voice_service.create_greeting_twiml(callback_url)
+
+        return Response(content=twiml, media_type="application/xml")
+
+    except Exception as e:
+        print(f"Error handling incoming call: {e}")
+        import traceback
+        traceback.print_exc()
+
+        from twilio.twiml.voice_response import VoiceResponse
+        response = VoiceResponse()
+        response.say("Sorry, we're experiencing technical difficulties. Please try again later.")
+        response.hangup()
+        return Response(content=str(response), media_type="application/xml")
+
+
+@app.post("/api/twilio/voice/gather/{session_id}/{call_sid}")
+async def twilio_gather_speech(request: Request, session_id: str, call_sid: str):
+    """
+    Twilio webhook for gathering user speech
+    Processes speech and returns AI response
+    """
+    try:
+        # Get form data from Twilio
+        form_data = await request.form()
+        speech_result = form_data.get("SpeechResult", "")
+
+        # Check if user wants to end call
+        if any(phrase in speech_result.lower() for phrase in ["goodbye", "bye", "hang up", "end call"]):
+            voice_service = get_or_create_session(call_sid, session_id, {}, rag_service)
+            twiml = voice_service.create_goodbye_twiml()
+            cleanup_session(call_sid)
+            return Response(content=twiml, media_type="application/xml")
+
+        # Get session configuration
+        config = await rag_service.get_session_config(session_id)
+        if not config:
+            from twilio.twiml.voice_response import VoiceResponse
+            response = VoiceResponse()
+            response.say("Session expired. Please call back.")
+            response.hangup()
+            cleanup_session(call_sid)
+            return Response(content=str(response), media_type="application/xml")
+
+        # Get voice service for this call
+        voice_service = get_or_create_session(call_sid, session_id, config, rag_service)
+
+        # Generate callback URL
+        base_url = os.getenv("BASE_URL", "https://your-domain.com")
+        callback_url = f"{base_url}/api/twilio/voice/gather/{session_id}/{call_sid}"
+
+        # Create response TwiML
+        twiml = await voice_service.create_response_twiml(speech_result, callback_url)
+
+        return Response(content=twiml, media_type="application/xml")
+
+    except Exception as e:
+        print(f"Error processing speech: {e}")
+        import traceback
+        traceback.print_exc()
+
+        from twilio.twiml.voice_response import VoiceResponse
+        response = VoiceResponse()
+        response.say("Sorry, I had trouble understanding that. Let me try again.")
+        response.redirect(f"/api/twilio/voice/gather/{session_id}/{call_sid}")
+        return Response(content=str(response), media_type="application/xml")
+
+
+@app.post("/api/twilio/voice/status")
+async def twilio_call_status(request: Request):
+    """
+    Twilio webhook for call status updates
+    Cleanup sessions when calls end
+    """
+    try:
+        form_data = await request.form()
+        call_sid = form_data.get("CallSid")
+        call_status = form_data.get("CallStatus")
+
+        print(f"Call {call_sid} status: {call_status}")
+
+        # Cleanup session when call ends
+        if call_status in ["completed", "failed", "busy", "no-answer"]:
+            cleanup_session(call_sid)
+
+        return JSONResponse(content={"success": True})
+
+    except Exception as e:
+        print(f"Error handling call status: {e}")
+        return JSONResponse(content={"success": False, "error": str(e)})
 
 
 if __name__ == "__main__":

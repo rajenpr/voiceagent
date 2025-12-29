@@ -401,13 +401,13 @@ export default function DemoSandbox() {
           viewport={{ once: true }}
           className="text-center mb-12"
         >
-          <h2 className="text-5xl md:text-6xl font-bold text-white mb-6">
+          <h2 className="text-5xl md:text-6xl font-bold text-[#0A2540] mb-6">
             Try It{' '}
-            <span className="bg-gradient-to-r from-stripe-purple to-stripe-lightBlue bg-clip-text text-transparent">
+            <span className="text-[#635BFF]">
               Live
             </span>
           </h2>
-          <p className="text-xl text-gray-300 max-w-2xl mx-auto">
+          <p className="text-xl text-[#425466] max-w-2xl mx-auto">
             Experience the power of real-time voice AI. Upload your business information
             and have a conversation in seconds.
           </p>
@@ -417,7 +417,7 @@ export default function DemoSandbox() {
           initial={{ opacity: 0, scale: 0.95 }}
           whileInView={{ opacity: 1, scale: 1 }}
           viewport={{ once: true }}
-          className="bg-gradient-to-br from-slate-800/50 to-slate-900/50 backdrop-blur-sm border border-white/10 rounded-2xl p-8 shadow-2xl"
+          className="bg-white border border-gray-200 rounded-2xl p-8 shadow-lg"
         >
           {/* Progress Steps */}
           <div className="flex justify-between mb-12">
@@ -427,13 +427,13 @@ export default function DemoSandbox() {
                   <div
                     className={`w-12 h-12 rounded-full flex items-center justify-center font-bold transition-all ${
                       step >= s
-                        ? 'bg-gradient-to-r from-stripe-purple to-stripe-lightBlue text-white'
-                        : 'bg-slate-700 text-gray-400'
+                        ? 'bg-[#635BFF] text-white'
+                        : 'bg-gray-100 text-gray-400 border-2 border-gray-200'
                     }`}
                   >
                     {s}
                   </div>
-                  <div className={`mt-2 text-sm ${step >= s ? 'text-white' : 'text-gray-400'}`}>
+                  <div className={`mt-2 text-sm font-medium ${step >= s ? 'text-[#0A2540]' : 'text-gray-400'}`}>
                     {s === 1 && 'Business Info'}
                     {s === 2 && 'Upload Docs'}
                     {s === 3 && 'Test Call'}
@@ -442,7 +442,7 @@ export default function DemoSandbox() {
                 {s < 3 && (
                   <div
                     className={`h-1 flex-1 mx-4 rounded ${
-                      step > s ? 'bg-gradient-to-r from-stripe-purple to-stripe-lightBlue' : 'bg-slate-700'
+                      step > s ? 'bg-[#635BFF]' : 'bg-gray-200'
                     }`}
                   />
                 )}
@@ -461,24 +461,24 @@ export default function DemoSandbox() {
                 className="space-y-6"
               >
                 <div>
-                  <label className="block text-white font-semibold mb-2">Business Name</label>
+                  <label className="block text-[#0A2540] font-semibold mb-2">Business Name</label>
                   <input
                     type="text"
                     name="businessName"
                     value={formData.businessName}
                     onChange={handleInputChange}
                     placeholder="e.g., Quick Fix Plumbing"
-                    className="w-full px-4 py-3 bg-slate-800/50 border border-white/10 rounded-lg text-white placeholder-gray-400 focus:border-stripe-purple focus:outline-none transition-colors"
+                    className="w-full px-4 py-3 bg-white border border-gray-300 rounded-md text-[#0A2540] placeholder-gray-400 focus:border-[#635BFF] focus:ring-2 focus:ring-[#635BFF]/20 focus:outline-none transition-all"
                   />
                 </div>
 
                 <div>
-                  <label className="block text-white font-semibold mb-2">Industry</label>
+                  <label className="block text-[#0A2540] font-semibold mb-2">Industry</label>
                   <select
                     name="industry"
                     value={formData.industry}
                     onChange={handleInputChange}
-                    className="w-full px-4 py-3 bg-slate-800/50 border border-white/10 rounded-lg text-white focus:border-stripe-purple focus:outline-none transition-colors"
+                    className="w-full px-4 py-3 bg-white border border-gray-300 rounded-md text-[#0A2540] focus:border-[#635BFF] focus:ring-2 focus:ring-[#635BFF]/20 focus:outline-none transition-all"
                   >
                     <option value="">Select your industry</option>
                     {industries.map((industry) => (
@@ -490,12 +490,12 @@ export default function DemoSandbox() {
                 </div>
 
                 <div>
-                  <label className="block text-white font-semibold mb-2">Primary Goal</label>
+                  <label className="block text-[#0A2540] font-semibold mb-2">Primary Goal</label>
                   <select
                     name="primaryGoal"
                     value={formData.primaryGoal}
                     onChange={handleInputChange}
-                    className="w-full px-4 py-3 bg-slate-800/50 border border-white/10 rounded-lg text-white focus:border-stripe-purple focus:outline-none transition-colors"
+                    className="w-full px-4 py-3 bg-white border border-gray-300 rounded-md text-[#0A2540] focus:border-[#635BFF] focus:ring-2 focus:ring-[#635BFF]/20 focus:outline-none transition-all"
                   >
                     <option value="">What should the AI help with?</option>
                     {goals.map((goal) => (
@@ -507,7 +507,7 @@ export default function DemoSandbox() {
                 </div>
 
                 <div>
-                  <label className="block text-white font-semibold mb-2">
+                  <label className="block text-[#0A2540] font-semibold mb-2">
                     System Instructions (How should the AI behave?)
                   </label>
                   <textarea
@@ -516,7 +516,7 @@ export default function DemoSandbox() {
                     onChange={handleInputChange}
                     rows={8}
                     placeholder="Enter detailed instructions for how the AI should handle conversations..."
-                    className="w-full px-4 py-3 bg-slate-800/50 border border-white/10 rounded-lg text-white placeholder-gray-400 focus:border-stripe-purple focus:outline-none transition-colors resize-none font-mono text-sm"
+                    className="w-full px-4 py-3 bg-white border border-gray-300 rounded-md text-[#0A2540] placeholder-gray-400 focus:border-[#635BFF] focus:ring-2 focus:ring-[#635BFF]/20 focus:outline-none transition-all resize-none font-mono text-sm"
                   />
                   <p className="text-gray-400 text-xs mt-2">
                     💡 Tip: Be specific about the steps the AI should follow (e.g., &ldquo;First ask for name, then phone number, then preferred appointment time...&rdquo;)
@@ -526,7 +526,7 @@ export default function DemoSandbox() {
                 <button
                   onClick={() => setStep(2)}
                   disabled={!formData.businessName || !formData.industry || !formData.primaryGoal}
-                  className="w-full px-6 py-4 bg-gradient-to-r from-stripe-purple to-stripe-lightBlue text-white rounded-lg font-semibold shadow-lg hover:shadow-xl transition-all disabled:opacity-50 disabled:cursor-not-allowed transform hover:scale-[1.02]"
+                  className="w-full px-6 py-4 bg-[#635BFF] hover:bg-[#7A73FF] text-white rounded-md font-semibold shadow-sm hover:shadow-md transition-all disabled:opacity-50 disabled:cursor-not-allowed disabled:hover:bg-[#635BFF]"
                 >
                   Continue to Upload
                 </button>
@@ -549,8 +549,8 @@ export default function DemoSandbox() {
                   onDrop={handleDrop}
                   className={`border-2 border-dashed rounded-xl p-12 text-center transition-all ${
                     dragActive
-                      ? 'border-stripe-purple bg-stripe-purple/10'
-                      : 'border-white/20 hover:border-stripe-purple/50'
+                      ? 'border-[#635BFF] bg-[#635BFF]/5'
+                      : 'border-gray-300 hover:border-[#635BFF]/50 bg-gray-50'
                   }`}
                 >
                   <svg
@@ -566,10 +566,10 @@ export default function DemoSandbox() {
                       d="M7 16a4 4 0 01-.88-7.903A5 5 0 1115.9 6L16 6a5 5 0 011 9.9M15 13l-3-3m0 0l-3 3m3-3v12"
                     />
                   </svg>
-                  <p className="text-white font-semibold mb-2">
+                  <p className="text-[#0A2540] font-semibold mb-2">
                     Drop your files here or click to browse
                   </p>
-                  <p className="text-gray-400 text-sm mb-4">
+                  <p className="text-[#425466] text-sm mb-4">
                     PDF, TXT, or DOCX files (Service menus, pricing, FAQs)
                   </p>
                   <input
@@ -651,7 +651,7 @@ export default function DemoSandbox() {
               </motion.div>
             )}
 
-            {/* Step 3: Test Call */}
+            {/* Step 3: Test Call - Phone Based */}
             {step === 3 && (
               <motion.div
                 key="step3"
@@ -660,122 +660,129 @@ export default function DemoSandbox() {
                 exit={{ opacity: 0, x: -20 }}
                 className="space-y-6"
               >
-                <div className="bg-slate-800/30 rounded-xl p-6 mb-6">
-                  <h4 className="text-white font-semibold mb-4">Your Configuration:</h4>
-                  <div className="space-y-2 text-gray-300">
-                    <p>
-                      <span className="text-gray-400">Business:</span> {formData.businessName}
+                {/* Configuration Summary */}
+                <div className="bg-gray-50 border border-gray-200 rounded-xl p-6 mb-6">
+                  <h4 className="text-[#0A2540] font-semibold mb-4 flex items-center">
+                    <svg className="w-5 h-5 mr-2 text-[#635BFF]" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                      <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M9 12l2 2 4-4m6 2a9 9 0 11-18 0 9 9 0 0118 0z" />
+                    </svg>
+                    Your Configuration
+                  </h4>
+                  <div className="space-y-2 text-[#425466]">
+                    <p className="flex items-center">
+                      <span className="text-[#8898AA] min-w-24">Business:</span>
+                      <span className="font-medium">{formData.businessName}</span>
                     </p>
-                    <p>
-                      <span className="text-gray-400">Industry:</span> {formData.industry}
+                    <p className="flex items-center">
+                      <span className="text-[#8898AA] min-w-24">Industry:</span>
+                      <span className="font-medium">{formData.industry}</span>
                     </p>
-                    <p>
-                      <span className="text-gray-400">Goal:</span> {formData.primaryGoal}
+                    <p className="flex items-center">
+                      <span className="text-[#8898AA] min-w-24">Goal:</span>
+                      <span className="font-medium">{formData.primaryGoal}</span>
                     </p>
-                    <p>
-                      <span className="text-gray-400">Files:</span> {uploadedFiles.length} uploaded
+                    <p className="flex items-center">
+                      <span className="text-[#8898AA] min-w-24">Files:</span>
+                      <span className="font-medium">{uploadedFiles.length} uploaded</span>
                     </p>
                   </div>
                 </div>
 
-                <div className="text-center">
-                  {!isCallActive ? (
-                    <>
-                      <motion.button
-                        whileHover={{ scale: 1.05 }}
-                        whileTap={{ scale: 0.95 }}
-                        onClick={startCall}
-                        className="w-full md:w-auto px-12 py-6 bg-gradient-to-r from-stripe-purple to-stripe-lightBlue text-white rounded-xl font-bold text-lg shadow-2xl hover:shadow-stripe-purple/50 transition-all mb-4"
-                      >
-                        <div className="flex items-center justify-center space-x-3">
-                          <svg className="w-6 h-6" fill="none" viewBox="0 0 24 24" stroke="currentColor">
-                            <path
-                              strokeLinecap="round"
-                              strokeLinejoin="round"
-                              strokeWidth={2}
-                              d="M3 5a2 2 0 012-2h3.28a1 1 0 01.948.684l1.498 4.493a1 1 0 01-.502 1.21l-2.257 1.13a11.042 11.042 0 005.516 5.516l1.13-2.257a1 1 0 011.21-.502l4.493 1.498a1 1 0 01.684.949V19a2 2 0 01-2 2h-1C9.716 21 3 14.284 3 6V5z"
-                            />
-                          </svg>
-                          <span>Start Test Call</span>
-                        </div>
-                      </motion.button>
-                      <p className="text-gray-400 text-sm">
-                        Click to initiate a WebRTC voice session in your browser
-                      </p>
-                    </>
-                  ) : (
-                    <div className="space-y-6">
-                      <div className="flex flex-col items-center">
-                        <motion.div
-                          animate={{ scale: [1, 1.1, 1] }}
-                          transition={{ repeat: Infinity, duration: 2 }}
-                          className="w-32 h-32 bg-gradient-to-r from-stripe-purple to-stripe-lightBlue rounded-full flex items-center justify-center mb-6"
-                        >
-                          <svg className="w-16 h-16 text-white" fill="none" viewBox="0 0 24 24" stroke="currentColor">
-                            <path
-                              strokeLinecap="round"
-                              strokeLinejoin="round"
-                              strokeWidth={2}
-                              d="M19 11a7 7 0 01-7 7m0 0a7 7 0 01-7-7m7 7v4m0 0H8m4 0h4m-4-8a3 3 0 01-3-3V5a3 3 0 116 0v6a3 3 0 01-3 3z"
-                            />
-                          </svg>
-                        </motion.div>
-                        <p className="text-white font-semibold text-xl mb-2">Call in Progress</p>
-                        <div className="flex items-center justify-center space-x-2 mb-4">
-                          <div className={`w-3 h-3 rounded-full ${isProcessing ? 'bg-blue-500 animate-pulse' : isListening ? 'bg-green-500 animate-pulse' : 'bg-gray-500'}`} />
-                          <p className="text-gray-400">
-                            {isProcessing ? 'Processing your response...' : isListening ? 'Listening...' : 'Waiting for speech'}
-                          </p>
-                        </div>
-
-                        {/* User Transcript */}
-                        {userTranscript && (
-                          <motion.div
-                            initial={{ opacity: 0, y: 10 }}
-                            animate={{ opacity: 1, y: 0 }}
-                            className="mt-4 p-4 bg-blue-900/30 border border-blue-500/30 rounded-xl max-w-md"
-                          >
-                            <div className="flex items-start space-x-3">
-                              <svg className="w-5 h-5 text-blue-400 flex-shrink-0 mt-1" fill="none" viewBox="0 0 24 24" stroke="currentColor">
-                                <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M16 7a4 4 0 11-8 0 4 4 0 018 0zM12 14a7 7 0 00-7 7h14a7 7 0 00-7-7z" />
-                              </svg>
-                              <p className="text-blue-100 text-sm leading-relaxed">You: {userTranscript}</p>
-                            </div>
-                          </motion.div>
-                        )}
-
-                        {/* Agent Message Display */}
-                        {agentMessage && (
-                          <motion.div
-                            initial={{ opacity: 0, y: 10 }}
-                            animate={{ opacity: 1, y: 0 }}
-                            className="mt-6 p-6 bg-slate-800/50 border border-white/10 rounded-xl max-w-md"
-                          >
-                            <div className="flex items-start space-x-3">
-                              <svg className="w-6 h-6 text-stripe-purple flex-shrink-0 mt-1" fill="none" viewBox="0 0 24 24" stroke="currentColor">
-                                <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M8 10h.01M12 10h.01M16 10h.01M9 16H5a2 2 0 01-2-2V6a2 2 0 012-2h14a2 2 0 012 2v8a2 2 0 01-2 2h-5l-5 5v-5z" />
-                              </svg>
-                              <p className="text-white text-lg leading-relaxed">{agentMessage}</p>
-                            </div>
-                          </motion.div>
-                        )}
-                      </div>
-
-                      <button
-                        onClick={endCall}
-                        className="px-8 py-4 bg-red-500 hover:bg-red-600 text-white rounded-lg font-semibold transition-colors"
-                      >
-                        End Call
-                      </button>
+                {/* Phone Number Display */}
+                <div className="bg-gradient-to-br from-[#635BFF]/5 to-[#00D4FF]/5 border-2 border-[#635BFF] rounded-2xl p-8 text-center">
+                  <div className="mb-6">
+                    <div className="w-20 h-20 bg-[#635BFF] rounded-full flex items-center justify-center mx-auto mb-4">
+                      <svg className="w-10 h-10 text-white" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                        <path
+                          strokeLinecap="round"
+                          strokeLinejoin="round"
+                          strokeWidth={2}
+                          d="M3 5a2 2 0 012-2h3.28a1 1 0 01.948.684l1.498 4.493a1 1 0 01-.502 1.21l-2.257 1.13a11.042 11.042 0 005.516 5.516l1.13-2.257a1 1 0 011.21-.502l4.493 1.498a1 1 0 01.684.949V19a2 2 0 01-2 2h-1C9.716 21 3 14.284 3 6V5z"
+                        />
+                      </svg>
                     </div>
-                  )}
+                    <h3 className="text-2xl font-bold text-[#0A2540] mb-2">
+                      Ready to Test Your Voice AI
+                    </h3>
+                    <p className="text-[#425466] mb-6">
+                      Call the number below to experience your configured AI assistant
+                    </p>
+                  </div>
+
+                  {/* Phone Number */}
+                  <div className="bg-white border-2 border-[#635BFF] rounded-xl p-6 mb-6">
+                    <p className="text-sm text-[#8898AA] mb-2 uppercase tracking-wide font-semibold">
+                      Test Phone Number
+                    </p>
+                    <a
+                      href="tel:+18001234567"
+                      className="text-4xl md:text-5xl font-bold text-[#635BFF] hover:text-[#7A73FF] transition-colors"
+                    >
+                      +1 (800) 123-4567
+                    </a>
+                    <p className="text-xs text-[#8898AA] mt-3">
+                      📱 Tap to call from mobile
+                    </p>
+                  </div>
+
+                  {/* Instructions */}
+                  <div className="text-left bg-white rounded-xl p-6 mb-6">
+                    <h4 className="font-semibold text-[#0A2540] mb-4 flex items-center">
+                      <svg className="w-5 h-5 mr-2 text-[#635BFF]" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                        <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M13 16h-1v-4h-1m1-4h.01M21 12a9 9 0 11-18 0 9 9 0 0118 0z" />
+                      </svg>
+                      How to Test
+                    </h4>
+                    <ol className="space-y-3 text-[#425466]">
+                      <li className="flex items-start">
+                        <span className="bg-[#635BFF] text-white w-6 h-6 rounded-full flex items-center justify-center text-sm font-bold mr-3 flex-shrink-0 mt-0.5">
+                          1
+                        </span>
+                        <span>Call the number above from your phone</span>
+                      </li>
+                      <li className="flex items-start">
+                        <span className="bg-[#635BFF] text-white w-6 h-6 rounded-full flex items-center justify-center text-sm font-bold mr-3 flex-shrink-0 mt-0.5">
+                          2
+                        </span>
+                        <span>The AI will greet you and ask how it can help</span>
+                      </li>
+                      <li className="flex items-start">
+                        <span className="bg-[#635BFF] text-white w-6 h-6 rounded-full flex items-center justify-center text-sm font-bold mr-3 flex-shrink-0 mt-0.5">
+                          3
+                        </span>
+                        <span>Test appointment booking, questions, or any scenario</span>
+                      </li>
+                      <li className="flex items-start">
+                        <span className="bg-[#635BFF] text-white w-6 h-6 rounded-full flex items-center justify-center text-sm font-bold mr-3 flex-shrink-0 mt-0.5">
+                          4
+                        </span>
+                        <span>Say &quot;goodbye&quot; or hang up when finished</span>
+                      </li>
+                    </ol>
+                  </div>
+
+                  {/* Features List */}
+                  <div className="grid grid-cols-1 md:grid-cols-3 gap-4 text-sm">
+                    <div className="bg-white rounded-lg p-4">
+                      <div className="text-[#635BFF] font-semibold mb-1">✨ Natural Speech</div>
+                      <div className="text-[#8898AA]">Human-like conversation</div>
+                    </div>
+                    <div className="bg-white rounded-lg p-4">
+                      <div className="text-[#635BFF] font-semibold mb-1">⚡ Fast Response</div>
+                      <div className="text-[#8898AA]">&lt;800ms latency</div>
+                    </div>
+                    <div className="bg-white rounded-lg p-4">
+                      <div className="text-[#635BFF] font-semibold mb-1">🧠 Smart AI</div>
+                      <div className="text-[#8898AA]">Custom trained for you</div>
+                    </div>
+                  </div>
                 </div>
 
                 <button
                   onClick={() => setStep(2)}
-                  className="w-full px-6 py-3 bg-slate-700 hover:bg-slate-600 text-white rounded-lg font-semibold transition-colors"
+                  className="w-full px-6 py-3 border-2 border-gray-300 hover:border-[#635BFF] bg-white text-[#0A2540] rounded-md font-semibold transition-all"
                 >
-                  Back to Upload
+                  ← Back to Upload
                 </button>
               </motion.div>
             )}

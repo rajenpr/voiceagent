@@ -8,184 +8,171 @@ export default function HeroSection() {
     visible: {
       opacity: 1,
       transition: {
-        staggerChildren: 0.2,
+        staggerChildren: 0.15,
+        delayChildren: 0.2,
       },
     },
   };
 
   const itemVariants = {
-    hidden: { y: 20, opacity: 0 },
+    hidden: { y: 30, opacity: 0 },
     visible: {
       y: 0,
       opacity: 1,
       transition: {
-        duration: 0.6,
-        ease: 'easeOut',
+        duration: 0.7,
+        ease: [0.25, 0.1, 0.25, 1],
       },
     },
   };
 
   return (
-    <section className="relative min-h-screen flex items-center justify-center px-6 pt-20">
+    <section className="relative pt-32 pb-20 px-6 overflow-hidden">
+      {/* Hero Content */}
       <motion.div
         variants={containerVariants}
         initial="hidden"
         animate="visible"
         className="max-w-7xl mx-auto"
       >
-        {/* Main Hero Content */}
-        <div className="text-center mb-16">
-          <motion.div variants={itemVariants} className="mb-6">
-            <span className="inline-block px-4 py-2 bg-stripe-purple/20 border border-stripe-purple/30 rounded-full text-stripe-lightBlue text-sm font-semibold mb-6">
+        <div className="max-w-4xl">
+          {/* Badge */}
+          <motion.div variants={itemVariants} className="mb-8">
+            <span className="inline-flex items-center px-4 py-1.5 rounded-full border border-gray-200 bg-white text-sm font-medium text-[#425466]">
+              <span className="w-2 h-2 bg-[#635BFF] rounded-full mr-2 animate-pulse"></span>
               Powered by Pipecat.ai & WebRTC
             </span>
           </motion.div>
 
+          {/* Main Heading */}
           <motion.h1
             variants={itemVariants}
-            className="text-6xl md:text-7xl lg:text-8xl font-bold text-white mb-6 leading-tight"
+            className="text-7xl md:text-8xl lg:text-[112px] font-bold text-[#0A2540] mb-8 leading-[1.05] tracking-tight"
           >
-            Never miss a{' '}
-            <span className="bg-gradient-to-r from-stripe-purple via-stripe-gradient2 to-stripe-lightBlue bg-clip-text text-transparent">
-              service call
-            </span>
-            {' '}again
+            Voice AI for modern{' '}
+            <span className="text-[#635BFF]">businesses</span>
           </motion.h1>
 
+          {/* Subheading */}
           <motion.p
             variants={itemVariants}
-            className="text-xl md:text-2xl text-gray-300 max-w-3xl mx-auto mb-8"
+            className="text-xl md:text-2xl text-[#425466] max-w-2xl mb-10 leading-relaxed"
           >
-            Industry-agnostic voice AI that handles lead qualification, appointment booking,
-            and complex troubleshooting with &lt;800ms latency
+            Handle customer calls with intelligent AI agents. Book appointments, qualify leads, and provide support with sub-800ms latency.
           </motion.p>
 
-          <motion.div variants={itemVariants} className="flex flex-col sm:flex-row gap-4 justify-center">
-            <button className="px-8 py-4 bg-gradient-to-r from-stripe-purple to-stripe-lightBlue text-white rounded-lg font-semibold shadow-2xl hover:shadow-stripe-purple/50 transition-all transform hover:scale-105">
-              Try Live Demo
-            </button>
-            <button className="px-8 py-4 bg-white/10 backdrop-blur-sm border border-white/20 text-white rounded-lg font-semibold hover:bg-white/20 transition-all">
-              View Documentation
-            </button>
+          {/* CTA Buttons */}
+          <motion.div variants={itemVariants} className="flex flex-wrap gap-4 mb-16">
+            <a
+              href="#demo"
+              className="inline-flex items-center px-6 py-3 bg-[#635BFF] hover:bg-[#7A73FF] text-white rounded-md font-medium text-base transition-all shadow-sm hover:shadow-md"
+            >
+              Start now
+              <svg className="ml-2 w-4 h-4" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M9 5l7 7-7 7" />
+              </svg>
+            </a>
+            <a
+              href="#"
+              className="inline-flex items-center px-6 py-3 border border-gray-300 hover:border-gray-400 bg-white text-[#0A2540] rounded-md font-medium text-base transition-all"
+            >
+              Contact sales
+              <svg className="ml-2 w-4 h-4" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M9 5l7 7-7 7" />
+              </svg>
+            </a>
+          </motion.div>
+
+          {/* Trust Indicators */}
+          <motion.div variants={itemVariants} className="pt-8 border-t border-gray-200">
+            <p className="text-sm text-[#8898AA] mb-4 uppercase tracking-wider font-medium">
+              Trusted by leading businesses
+            </p>
+            <div className="flex flex-wrap items-center gap-8">
+              {['Medical Clinics', 'Legal Firms', 'Home Services', 'Real Estate'].map((industry, index) => (
+                <div
+                  key={index}
+                  className="text-[#425466] font-medium text-sm px-4 py-2 bg-gray-50 rounded-md"
+                >
+                  {industry}
+                </div>
+              ))}
+            </div>
           </motion.div>
         </div>
+      </motion.div>
 
-        {/* Bento Box Layout */}
-        <motion.div
-          variants={containerVariants}
-          className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6 mt-20"
-        >
-          {/* Large Feature Card */}
-          <motion.div
-            variants={itemVariants}
-            whileHover={{ scale: 1.02, y: -5 }}
-            className="lg:col-span-2 bg-gradient-to-br from-slate-800/50 to-slate-900/50 backdrop-blur-sm border border-white/10 rounded-2xl p-8 shadow-xl"
-          >
-            <div className="flex items-center mb-4">
-              <div className="w-12 h-12 bg-gradient-to-br from-stripe-purple to-stripe-lightBlue rounded-lg flex items-center justify-center mr-4">
-                <svg className="w-6 h-6 text-white" fill="none" viewBox="0 0 24 24" stroke="currentColor">
-                  <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M13 10V3L4 14h7v7l9-11h-7z" />
+      {/* Stats Section - Stripe style */}
+      <motion.div
+        variants={containerVariants}
+        initial="hidden"
+        whileInView="visible"
+        viewport={{ once: true }}
+        className="max-w-7xl mx-auto mt-32"
+      >
+        <div className="grid grid-cols-1 md:grid-cols-3 gap-12">
+          <motion.div variants={itemVariants} className="text-center md:text-left">
+            <div className="text-5xl font-bold text-[#0A2540] mb-3">&lt;800ms</div>
+            <p className="text-lg text-[#425466]">Average response time for natural conversations</p>
+          </motion.div>
+          <motion.div variants={itemVariants} className="text-center md:text-left">
+            <div className="text-5xl font-bold text-[#0A2540] mb-3">24/7</div>
+            <p className="text-lg text-[#425466]">Always-on availability for your customers</p>
+          </motion.div>
+          <motion.div variants={itemVariants} className="text-center md:text-left">
+            <div className="text-5xl font-bold text-[#0A2540] mb-3">99.9%</div>
+            <p className="text-lg text-[#425466]">Uptime SLA with enterprise reliability</p>
+          </motion.div>
+        </div>
+      </motion.div>
+
+      {/* Feature Cards - Clean Stripe Style */}
+      <motion.div
+        variants={containerVariants}
+        initial="hidden"
+        whileInView="visible"
+        viewport={{ once: true }}
+        className="max-w-7xl mx-auto mt-32"
+      >
+        <div className="grid grid-cols-1 md:grid-cols-3 gap-8">
+          {[
+            {
+              icon: (
+                <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={1.5} d="M13 10V3L4 14h7v7l9-11h-7z" />
+              ),
+              title: 'Ultra-low latency',
+              description: 'Sub-800ms response times with WebRTC and streaming TTS for natural phone conversations.',
+            },
+            {
+              icon: (
+                <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={1.5} d="M9 12h6m-6 4h6m2 5H7a2 2 0 01-2-2V5a2 2 0 012-2h5.586a1 1 0 01.707.293l5.414 5.414a1 1 0 01.293.707V19a2 2 0 01-2 2z" />
+              ),
+              title: 'Custom knowledge base',
+              description: 'Upload your business documents and train AI on your specific services and pricing.',
+            },
+            {
+              icon: (
+                <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={1.5} d="M19 21V5a2 2 0 00-2-2H7a2 2 0 00-2 2v16m14 0h2m-2 0h-5m-9 0H3m2 0h5M9 7h1m-1 4h1m4-4h1m-1 4h1m-5 10v-5a1 1 0 011-1h2a1 1 0 011 1v5m-4 0h4" />
+              ),
+              title: 'Industry-agnostic',
+              description: 'Works for any business—from plumbers to medical clinics to legal firms.',
+            },
+          ].map((feature, index) => (
+            <motion.div
+              key={index}
+              variants={itemVariants}
+              className="group p-8 rounded-xl border border-gray-200 hover:border-[#635BFF] transition-all bg-white hover:shadow-lg"
+            >
+              <div className="w-12 h-12 rounded-lg bg-[#F6F9FC] group-hover:bg-[#635BFF]/10 flex items-center justify-center mb-6 transition-colors">
+                <svg className="w-6 h-6 text-[#635BFF]" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                  {feature.icon}
                 </svg>
               </div>
-              <h3 className="text-2xl font-bold text-white">Ultra-Low Latency</h3>
-            </div>
-            <p className="text-gray-300 text-lg mb-6">
-              WebRTC transport with streaming TTS ensures natural conversations with response times under 800ms
-            </p>
-            <div className="bg-slate-800/50 rounded-lg p-4 font-mono text-sm">
-              <div className="flex justify-between mb-2">
-                <span className="text-gray-400">LLM Response:</span>
-                <span className="text-stripe-green">~200ms</span>
-              </div>
-              <div className="flex justify-between mb-2">
-                <span className="text-gray-400">TTS Processing:</span>
-                <span className="text-stripe-green">~300ms</span>
-              </div>
-              <div className="flex justify-between">
-                <span className="text-gray-400">Network Latency:</span>
-                <span className="text-stripe-green">~150ms</span>
-              </div>
-            </div>
-          </motion.div>
-
-          {/* Smaller Feature Card */}
-          <motion.div
-            variants={itemVariants}
-            whileHover={{ scale: 1.02, y: -5 }}
-            className="bg-gradient-to-br from-slate-800/50 to-slate-900/50 backdrop-blur-sm border border-white/10 rounded-2xl p-8 shadow-xl"
-          >
-            <div className="w-12 h-12 bg-gradient-to-br from-purple-500 to-pink-500 rounded-lg flex items-center justify-center mb-4">
-              <svg className="w-6 h-6 text-white" fill="none" viewBox="0 0 24 24" stroke="currentColor">
-                <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M7 21a4 4 0 01-4-4V5a2 2 0 012-2h4a2 2 0 012 2v12a4 4 0 01-4 4zm0 0h12a2 2 0 002-2v-4a2 2 0 00-2-2h-2.343M11 7.343l1.657-1.657a2 2 0 012.828 0l2.829 2.829a2 2 0 010 2.828l-8.486 8.485M7 17h.01" />
-              </svg>
-            </div>
-            <h3 className="text-xl font-bold text-white mb-3">Custom Training</h3>
-            <p className="text-gray-300">
-              Upload your business docs and pricing to create a personalized knowledge base
-            </p>
-          </motion.div>
-
-          {/* Industry Examples */}
-          <motion.div
-            variants={itemVariants}
-            whileHover={{ scale: 1.02, y: -5 }}
-            className="bg-gradient-to-br from-slate-800/50 to-slate-900/50 backdrop-blur-sm border border-white/10 rounded-2xl p-8 shadow-xl"
-          >
-            <div className="w-12 h-12 bg-gradient-to-br from-blue-500 to-cyan-500 rounded-lg flex items-center justify-center mb-4">
-              <svg className="w-6 h-6 text-white" fill="none" viewBox="0 0 24 24" stroke="currentColor">
-                <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M19 21V5a2 2 0 00-2-2H7a2 2 0 00-2 2v16m14 0h2m-2 0h-5m-9 0H3m2 0h5M9 7h1m-1 4h1m4-4h1m-1 4h1m-5 10v-5a1 1 0 011-1h2a1 1 0 011 1v5m-4 0h4" />
-              </svg>
-            </div>
-            <h3 className="text-xl font-bold text-white mb-3">Any Industry</h3>
-            <div className="space-y-2 text-gray-300">
-              <div className="flex items-center">
-                <div className="w-2 h-2 bg-stripe-purple rounded-full mr-2"></div>
-                Plumbers
-              </div>
-              <div className="flex items-center">
-                <div className="w-2 h-2 bg-stripe-lightBlue rounded-full mr-2"></div>
-                Medical Clinics
-              </div>
-              <div className="flex items-center">
-                <div className="w-2 h-2 bg-stripe-green rounded-full mr-2"></div>
-                Electricians
-              </div>
-              <div className="flex items-center">
-                <div className="w-2 h-2 bg-purple-400 rounded-full mr-2"></div>
-                Legal Firms
-              </div>
-            </div>
-          </motion.div>
-
-          {/* Stats Card */}
-          <motion.div
-            variants={itemVariants}
-            whileHover={{ scale: 1.02, y: -5 }}
-            className="lg:col-span-2 bg-gradient-to-br from-slate-800/50 to-slate-900/50 backdrop-blur-sm border border-white/10 rounded-2xl p-8 shadow-xl"
-          >
-            <h3 className="text-xl font-bold text-white mb-6">Built for Performance</h3>
-            <div className="grid grid-cols-3 gap-6">
-              <div>
-                <div className="text-4xl font-bold bg-gradient-to-r from-stripe-purple to-stripe-lightBlue bg-clip-text text-transparent mb-2">
-                  99.9%
-                </div>
-                <div className="text-gray-400 text-sm">Uptime SLA</div>
-              </div>
-              <div>
-                <div className="text-4xl font-bold bg-gradient-to-r from-stripe-purple to-stripe-lightBlue bg-clip-text text-transparent mb-2">
-                  &lt;800ms
-                </div>
-                <div className="text-gray-400 text-sm">Response Time</div>
-              </div>
-              <div>
-                <div className="text-4xl font-bold bg-gradient-to-r from-stripe-purple to-stripe-lightBlue bg-clip-text text-transparent mb-2">
-                  24/7
-                </div>
-                <div className="text-gray-400 text-sm">Availability</div>
-              </div>
-            </div>
-          </motion.div>
-        </motion.div>
+              <h3 className="text-xl font-semibold text-[#0A2540] mb-3">{feature.title}</h3>
+              <p className="text-[#425466] leading-relaxed">{feature.description}</p>
+            </motion.div>
+          ))}
+        </div>
       </motion.div>
     </section>
   );

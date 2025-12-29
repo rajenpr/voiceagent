@@ -3,48 +3,42 @@
 @tailwind utilities;
 
 :root {
-  --foreground-rgb: 0, 0, 0;
-  --background-start-rgb: 214, 219, 220;
-  --background-end-rgb: 255, 255, 255;
-}
-
-@media (prefers-color-scheme: dark) {
-  :root {
-    --foreground-rgb: 255, 255, 255;
-    --background-start-rgb: 0, 0, 0;
-    --background-end-rgb: 0, 0, 0;
-  }
+  --stripe-purple: #635BFF;
+  --stripe-purple-light: #7A73FF;
+  --stripe-blue: #0A2540;
+  --stripe-slate: #425466;
+  --stripe-gray: #8898AA;
+  --background-white: 255, 255, 255;
+  --foreground-dark: 10, 37, 64;
 }
 
 body {
-  color: rgb(var(--foreground-rgb));
-  background: linear-gradient(
-      to bottom,
-      transparent,
-      rgb(var(--background-end-rgb))
-    )
-    rgb(var(--background-start-rgb));
+  color: rgb(var(--foreground-dark));
+  background: #ffffff;
   margin: 0;
   padding: 0;
   font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', 'Roboto', 'Oxygen', 'Ubuntu', 'Cantarell', 'Fira Sans', 'Droid Sans', 'Helvetica Neue', sans-serif;
+  -webkit-font-smoothing: antialiased;
+  -moz-osx-font-smoothing: grayscale;
 }
 
-/* Custom scrollbar */
+/* Custom scrollbar - Stripe style */
 ::-webkit-scrollbar {
-  width: 8px;
+  width: 12px;
 }
 
 ::-webkit-scrollbar-track {
-  background: #0A2540;
+  background: #f6f9fc;
 }
 
 ::-webkit-scrollbar-thumb {
-  background: #635BFF;
-  border-radius: 4px;
+  background: #c8ccd0;
+  border-radius: 6px;
+  border: 3px solid #f6f9fc;
 }
 
 ::-webkit-scrollbar-thumb:hover {
-  background: #7A73FF;
+  background: #8898aa;
 }
 
 /* Mesh gradient animation */
